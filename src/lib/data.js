@@ -109,8 +109,12 @@ export function formatTimeline(days) {
   return y < 2 ? '1 Jahr' : `${Math.round(y)} Jahre`;
 }
 
-// QR capacity in bytes (error correction M)
-const QR_CAPACITY = 1273;
+// QR max capacity in bytes per error correction level (Version 40)
+// L: 2953, M: 2331, Q: 1663, H: 1273
+export const QR_CAPACITY_BY_LEVEL = { L: 2953, M: 2331, Q: 1663, H: 1273 };
+
+// Demo uses Level M (15 % Fehlerkorrektur) — Standard für viele Anwendungen
+const QR_CAPACITY = QR_CAPACITY_BY_LEVEL.M;
 
 export function getCapacityInfo(dataSizeBytes, qrCapacity = QR_CAPACITY) {
   const pct = Math.min(dataSizeBytes / qrCapacity, 1);
