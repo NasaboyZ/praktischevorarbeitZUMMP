@@ -1,64 +1,64 @@
-// ── WebSocket Client ─────────────────────────────────────────────────────────
+// ── Realtime via Ably (works on Vercel + local) ──────────────────────────
+// Ably key: set VITE_ABLY_KEY in .env.local (dev) or Vercel environment variables
+import * as Ably from 'ably';
 
-let desktopWs = null;
+const KEY = import.meta.env.VITE_ABLY_KEY;
+const channelName = (sessionId) => `mlqr:${sessionId}`;
 
-export async function fetchServerInfo() {
-  try {
-    const res = await fetch('http://localhost:3001/api/info');
-    return await res.json();
-  } catch {
-    return { ip: 'localhost', port: 3001, frontendPort: 5173 };
+export function hasAblyKey() { return !!KEY; }
+
+// Returns the base URL for constructing mobile links
+export function getMobileBaseUrl() {
+  return window.location.origin;
+}
+
+// Desktop: listens for mobile to join, then sends data
+export function connectDesktop(sessionId, callbacks = {}) {
+  if (!KEY) {
+    console.error('[Ably] VITE_ABLY_KEY not set');
+    setTimeout(() => callbacks.onError?.(), 0);
+    return { close: () => {}, channel: null };
   }
+
+  const client = new Ably.Realtime({ key: KEY, clientId: `desktop-${sessionId}` });
+  const channel = client.channels.get(channelName(sessionId));
+
+  client.connection.once('connected', () => callbacks.onOpen?.());
+  client.connection.on('failed',      () => callbacks.onError?.());
+  client.connection.on('disconnected',() => callbacks.onClose?.());
+
+  channel.subscribe('mobile_joined', (msg) => callbacks.onMobileConnected?.(msg.data));
+
+  return { client, channel, close: () => client.close() };
 }
 
-export function connectDesktop(sessionId, wsUrl, callbacks = {}) {
-  const ws = new WebSocket(wsUrl);
-  desktopWs = ws;
-
-  ws.onopen = () => {
-    ws.send(JSON.stringify({ type: 'register', session: sessionId, role: 'desktop' }));
-    callbacks.onOpen?.();
-  };
-
-  ws.onmessage = (e) => {
-    let msg;
-    try { msg = JSON.parse(e.data); } catch { return; }
-    if (msg.type === 'mobile_connected') callbacks.onMobileConnected?.(msg);
-    if (msg.type === 'data_requested')   callbacks.onDataRequested?.(msg);
-    if (msg.type === 'registered')       callbacks.onRegistered?.(msg);
-  };
-
-  ws.onerror = () => callbacks.onError?.();
-  ws.onclose = () => callbacks.onClose?.();
-
-  return ws;
-}
-
-export function sendPayload(ws, payload) {
-  if (ws?.readyState === 1) {
-    ws.send(JSON.stringify({ type: 'send_data', payload }));
+// Publish full payload to mobile
+export function sendPayload(conn, payload) {
+  if (conn?.channel) {
+    conn.channel.publish('data', payload);
     return true;
   }
   return false;
 }
 
-export function connectMobile(sessionId, wsUrl, callbacks = {}) {
-  const ws = new WebSocket(wsUrl);
+// Mobile: announces presence and listens for data
+export function connectMobile(sessionId, callbacks = {}) {
+  if (!KEY) {
+    setTimeout(() => callbacks.onError?.(), 0);
+    return { close: () => {} };
+  }
 
-  ws.onopen = () => {
-    ws.send(JSON.stringify({ type: 'register', session: sessionId, role: 'mobile' }));
+  const client = new Ably.Realtime({ key: KEY, clientId: `mobile-${Date.now()}` });
+  const channel = client.channels.get(channelName(sessionId));
+
+  client.connection.once('connected', () => {
+    // Announce to desktop that mobile has joined
+    channel.publish('mobile_joined', { session: sessionId });
     callbacks.onOpen?.();
-  };
+  });
 
-  ws.onmessage = (e) => {
-    let msg;
-    try { msg = JSON.parse(e.data); } catch { return; }
-    if (msg.type === 'data')       callbacks.onData?.(msg.payload);
-    if (msg.type === 'registered') callbacks.onRegistered?.(msg);
-  };
+  channel.subscribe('data', (msg) => callbacks.onData?.(msg.data));
+  client.connection.on('failed', () => callbacks.onError?.());
 
-  ws.onerror = () => callbacks.onError?.();
-  ws.onclose = () => callbacks.onClose?.();
-
-  return ws;
+  return { client, close: () => client.close() };
 }

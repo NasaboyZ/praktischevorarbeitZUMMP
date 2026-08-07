@@ -5,7 +5,7 @@ import {
   generateSessionId, QR_CAPACITY_BY_LEVEL,
 } from '../lib/data';
 import { generateColorQR, tryGenerateNormalQR, generateSessionQR } from '../lib/qr';
-import { fetchServerInfo, connectDesktop, sendPayload } from '../lib/ws';
+import { connectDesktop, sendPayload, getMobileBaseUrl, hasAblyKey } from '../lib/ws';
 import XRayMode from './XRayMode';
 import JsonViewer from './JsonViewer';
 
@@ -508,87 +508,82 @@ function MultiLayerQRPanel({ colorQR, sessionQR, sessionId, mobileUrl, wsConnect
 export default function DesktopDemo() {
   // ─ State ─
   const [sessionId]    = useState(generateSessionId);
-  const [serverInfo, setServerInfo] = useState(null);
   const [userData, setUserData] = useState({
     name: '', mood: 4, text: '', images: [], audio: null,
     date: new Date().toISOString().split('T')[0],
   });
-  const [timeline,  setTimeline]  = useState(0);    // 0-100
-  const [normalQR,  setNormalQR]  = useState({ dataUrl: null, error: null, size: 0 });
-  const [colorQR,   setColorQR]   = useState(null);
-  const [sessionQR, setSessionQR] = useState(null);
+  const [timeline,    setTimeline]    = useState(0);
+  const [normalQR,    setNormalQR]    = useState({ dataUrl: null, error: null, size: 0 });
+  const [colorQR,     setColorQR]     = useState(null);
+  const [sessionQR,   setSessionQR]   = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
-  const [pipeStep,  setPipeStep]  = useState(-1);
-  const [showXRay,  setShowXRay]  = useState(false);
-  const [showJson,  setShowJson]  = useState(false);
-  const [activeTab, setActiveTab] = useState('quick');
-  const wsRef = useRef(null);
-  const genTimer = useRef(null);
+  const [pipeStep,    setPipeStep]    = useState(-1);
+  const [showXRay,    setShowXRay]    = useState(false);
+  const [showJson,    setShowJson]    = useState(false);
+  const [activeTab,   setActiveTab]   = useState('quick');
+  const connRef    = useRef(null);
+  const genTimer   = useRef(null);
+  // Refs to avoid stale closure when mobile joins
+  const userDataRef     = useRef(userData);
+  const timelineDaysRef = useRef(1);
+  useEffect(() => { userDataRef.current = userData; }, [userData]);
 
   const timelineDays = getTimelineDays(timeline);
   const dataSize     = calculateDataSize(userData, timelineDays);
+  useEffect(() => { timelineDaysRef.current = timelineDays; }, [timelineDays]);
 
-  // ─ Fetch server info & connect WebSocket ─
-  useEffect(() => {
-    fetchServerInfo().then((info) => {
-      setServerInfo(info);
-      const wsUrl = `ws://${info.ip}:${info.port}`;
-      const ws = connectDesktop(sessionId, wsUrl, {
-        onMobileConnected: () => setWsConnected(true),
-        onDataRequested:   () => {
-          const payload = buildPayload({ ...userData, sessionId }, timelineDays);
-          sendPayload(ws, payload);
-        },
-      });
-      wsRef.current = ws;
-    });
-    return () => wsRef.current?.close();
-  }, []); // eslint-disable-line
+  const mobileUrl = `${getMobileBaseUrl()}/?mobile=1&s=${sessionId}`;
 
-  // ─ Generate session QR whenever serverInfo changes ─
+  // ─ Generate session QR on mount ─
   useEffect(() => {
-    if (!serverInfo) return;
-    const { ip, port, frontendPort } = serverInfo;
-    const wsUrl    = `ws://${ip}:${port}`;
-    const mobileUrl = `http://${ip}:${frontendPort}/?mobile=1&s=${sessionId}&ws=${encodeURIComponent(wsUrl)}`;
     generateSessionQR(mobileUrl).then(setSessionQR);
-  }, [serverInfo, sessionId]);
+  }, [mobileUrl]);
 
-  // ─ Regenerate QR codes on data change (debounced) ─
+  // ─ Connect to Ably on mount ─
+  useEffect(() => {
+    const conn = connectDesktop(sessionId, {
+      onOpen: () => {},
+      onMobileConnected: () => {
+        setWsConnected(true);
+        // Send current data immediately when phone connects
+        const payload = buildPayload(
+          { ...userDataRef.current, sessionId },
+          timelineDaysRef.current
+        );
+        sendPayload(conn, payload);
+      },
+      onError: () => {},
+    });
+    connRef.current = conn;
+    return () => conn.close();
+  }, [sessionId]); // eslint-disable-line
+
+  // ─ Regenerate QR codes on data/timeline change (debounced) ─
   useEffect(() => {
     clearTimeout(genTimer.current);
     genTimer.current = setTimeout(async () => {
-      // Pipeline animation
       setPipeStep(0);
-      const steps = [0,1,2,3,4,5];
-      for (let i = 1; i <= steps.length; i++) {
-        await new Promise((r) => setTimeout(r, 180));
+      for (let i = 1; i <= 6; i++) {
+        await new Promise((r) => setTimeout(r, 160));
         setPipeStep(i);
       }
-
       const model   = buildDataModel({ ...userData, sessionId }, timelineDays);
       const jsonStr = JSON.stringify(model);
-
-      // Normal QR
-      const nqr = await tryGenerateNormalQR(jsonStr);
+      const nqr     = await tryGenerateNormalQR(jsonStr);
       setNormalQR(nqr);
-
-      // Multi-layer QR: 3 data splits
-      const [l1text, l2text, l3text] = splitDataForLayers(model);
-      const cqr = await generateColorQR(l1text, l2text, l3text);
+      const [l1, l2, l3] = splitDataForLayers(model);
+      const cqr = await generateColorQR(l1, l2, l3);
       setColorQR(cqr);
-
     }, 600);
     return () => clearTimeout(genTimer.current);
   }, [userData, timeline, sessionId, timelineDays]);
 
-  // ─ Send payload when mobile connects ─
+  // ─ Re-send data whenever it changes and phone is already connected ─
   useEffect(() => {
-    if (wsConnected && wsRef.current) {
-      const payload = buildPayload({ ...userData, sessionId }, timelineDays);
-      sendPayload(wsRef.current, payload);
-    }
-  }, [wsConnected]); // eslint-disable-line
+    if (!wsConnected || !connRef.current) return;
+    const payload = buildPayload({ ...userData, sessionId }, timelineDays);
+    sendPayload(connRef.current, payload);
+  }, [userData, timelineDays, wsConnected, sessionId]);
 
   // ─ Reset ─
   const handleReset = () => {
@@ -600,10 +595,6 @@ export default function DesktopDemo() {
     setWsConnected(false);
     setPipeStep(-1);
   };
-
-  const mobileUrl = serverInfo
-    ? `http://${serverInfo.ip}:${serverInfo.frontendPort}/?mobile=1&s=${sessionId}&ws=${encodeURIComponent(`ws://${serverInfo.ip}:${serverInfo.port}`)}`
-    : '';
 
   const dataModel = buildDataModel({ ...userData, sessionId }, timelineDays);
 
@@ -660,7 +651,7 @@ export default function DesktopDemo() {
           {/* Connection status */}
           <span className={`status-badge ${wsConnected ? 's-ok' : 's-blue'}`}>
             <span className="dot" />
-            {wsConnected ? 'SMARTPHONE' : serverInfo ? 'BEREIT' : 'VERBINDE...'}
+            {wsConnected ? 'SMARTPHONE' : hasAblyKey() ? 'BEREIT' : 'KEIN API KEY'}
           </span>
 
           {/* Actions */}
@@ -810,7 +801,7 @@ export default function DesktopDemo() {
                 </div>
                 <div style={{ textAlign:'right' }}>
                   <div className="label">Datengröße</div>
-                  <div style={{ fontFamily:'var(--f-mono)', fontSize:18, fontWeight:600, color: dataSize > 1273 ? 'var(--err)' : 'var(--ok)' }}>
+                  <div style={{ fontFamily:'var(--f-mono)', fontSize:18, fontWeight:600, color: dataSize > 2331 ? 'var(--err)' : 'var(--ok)' }}>
                     {formatSize(dataSize)}
                   </div>
                 </div>
@@ -893,10 +884,10 @@ export default function DesktopDemo() {
       }}>
         <span className="label">
           {wsConnected
-            ? 'Smartphone verbunden — Daten werden übertragen'
-            : serverInfo
-            ? `Server: ${serverInfo.ip}:${serverInfo.port} · QR-Code anklicken zum Scannen`
-            : 'WebSocket-Server wird gestartet... (npm run dev im Terminal)'}
+            ? 'Smartphone verbunden — Daten werden live übertragen'
+            : hasAblyKey()
+            ? 'Ably verbunden · QR-Code anklicken → Scan-QR erscheint'
+            : 'VITE_ABLY_KEY fehlt — Ably API Key in Vercel + .env.local eintragen'}
         </span>
 
         <div style={{ display:'flex', gap:12, marginLeft:'auto', alignItems:'center' }}>

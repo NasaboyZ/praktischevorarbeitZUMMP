@@ -237,29 +237,26 @@ function MemoryCard({ payload }) {
 export default function MobileView() {
   const params    = new URLSearchParams(window.location.search);
   const sessionId = params.get('s') || '';
-  const wsUrl     = params.get('ws') ? decodeURIComponent(params.get('ws')) : '';
 
-  const [phase,   setPhase]   = useState('connecting');  // connecting | reconstructing | done
+  const [phase,   setPhase]   = useState('connecting');
   const [payload, setPayload] = useState(null);
   const [error,   setError]   = useState(null);
-  const wsRef = useRef(null);
+  const connRef = useRef(null);
 
   useEffect(() => {
-    if (!sessionId || !wsUrl) {
+    if (!sessionId) {
       setError('Ungültige URL — scanne den QR-Code mit deiner Kamera-App');
       return;
     }
 
-    const ws = connectMobile(sessionId, wsUrl, {
-      onOpen:       () => setPhase('connecting'),
-      onRegistered: () => setPhase('waiting'),
-      onData:       (data) => { setPayload(data); setPhase('reconstructing'); },
-      onError:      () => setError('Verbindung fehlgeschlagen — stelle sicher, dass der Demo-Server läuft'),
-      onClose:      () => {},
+    const conn = connectMobile(sessionId, {
+      onOpen:  () => setPhase('waiting'),
+      onData:  (data) => { setPayload(data); setPhase('reconstructing'); },
+      onError: () => setError('Verbindung fehlgeschlagen — VITE_ABLY_KEY muss gesetzt sein'),
     });
-    wsRef.current = ws;
-    return () => ws.close();
-  }, [sessionId, wsUrl]);
+    connRef.current = conn;
+    return () => conn.close();
+  }, [sessionId]);
 
   return (
     <div style={{
