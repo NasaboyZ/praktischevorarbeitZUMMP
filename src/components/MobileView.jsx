@@ -238,9 +238,10 @@ export default function MobileView() {
   const params    = new URLSearchParams(window.location.search);
   const sessionId = params.get('s') || '';
 
-  const [phase,   setPhase]   = useState('connecting');
-  const [payload, setPayload] = useState(null);
-  const [error,   setError]   = useState(null);
+  const [phase,    setPhase]    = useState('connecting');
+  const [progress, setProgress] = useState({ received: 0, total: 0 });
+  const [payload,  setPayload]  = useState(null);
+  const [error,    setError]    = useState(null);
   const connRef = useRef(null);
 
   useEffect(() => {
@@ -250,60 +251,73 @@ export default function MobileView() {
     }
 
     const conn = connectMobile(sessionId, {
-      onOpen:  () => setPhase('waiting'),
-      onData:  (data) => { setPayload(data); setPhase('reconstructing'); },
-      onError: () => setError('Verbindung fehlgeschlagen — VITE_ABLY_KEY muss gesetzt sein'),
+      onOpen:       () => setPhase('waiting'),
+      onReceiving:  () => setPhase('receiving'),
+      onProgress:   (p) => setProgress(p),
+      onData:       (data) => { setPayload(data); setPhase('reconstructing'); },
+      onError:      () => setError('Verbindung fehlgeschlagen — VITE_ABLY_KEY muss in Vercel gesetzt sein'),
     });
     connRef.current = conn;
     return () => conn.close();
   }, [sessionId]);
 
-  return (
+  const Spinner = () => (
     <div style={{
-      minHeight: '100vh',
-      background: 'var(--bg-deep)',
-      fontFamily: 'var(--f-body)',
-    }}>
+      width: 40, height: 40, borderRadius: '50%',
+      border: '3px solid var(--bd-strong)', borderTopColor: 'var(--blue)',
+      animation: 'spin 1s linear infinite', margin: '0 auto 20px',
+    }} />
+  );
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-deep)', fontFamily: 'var(--f-body)' }}>
+
       {error && (
         <div style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
-          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--err)' }}>{error}</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--err)', lineHeight: 1.6 }}>{error}</div>
         </div>
       )}
 
       {!error && phase === 'connecting' && (
-        <div style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{
-            width: 48, height: 48, borderRadius: '50%',
-            border: '3px solid var(--bd-strong)',
-            borderTopColor: 'var(--blue)',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 20px',
-          }} />
-          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--blue)', letterSpacing: '0.1em' }}>
-            VERBINDE…
-          </div>
-          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-muted)', marginTop: 10 }}>
-            Session {sessionId}
-          </div>
+        <div style={{ padding: '70px 24px', textAlign: 'center' }}>
+          <Spinner />
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--blue)', letterSpacing: '0.1em' }}>VERBINDE…</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginTop: 8 }}>Session {sessionId}</div>
         </div>
       )}
 
       {!error && phase === 'waiting' && (
-        <div style={{ padding: '60px 24px', textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>📱</div>
-          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--ok)', letterSpacing: '0.1em' }}>
-            ✓ VERBUNDEN
-          </div>
-          <div style={{ fontFamily: 'var(--f-display)', fontSize: 20, fontWeight: 700, marginTop: 8 }}>
-            Session {sessionId}
-          </div>
+        <div style={{ padding: '70px 24px', textAlign: 'center' }}>
+          <div style={{ fontSize: 44, marginBottom: 12 }}>📱</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--ok)', letterSpacing: '0.12em' }}>✓ VERBUNDEN</div>
+          <div style={{ fontFamily: 'var(--f-display)', fontSize: 22, fontWeight: 700, marginTop: 8 }}>Session {sessionId}</div>
           <div style={{ fontSize: 13, color: 'var(--tx-secondary)', marginTop: 12, lineHeight: 1.6 }}>
-            Warte auf Daten vom Desktop…<br />
-            <span style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-muted)' }}>
-              (Eingaben im Desktop-Browser werden hier erscheinen)
-            </span>
+            Warte auf Daten vom Desktop…
           </div>
+        </div>
+      )}
+
+      {!error && phase === 'receiving' && (
+        <div style={{ padding: '70px 24px', textAlign: 'center' }}>
+          <Spinner />
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--blue)', letterSpacing: '0.1em' }}>
+            EMPFANGE DATEN…
+          </div>
+          {progress.total > 0 && (
+            <div style={{ maxWidth: 240, margin: '16px auto 0' }}>
+              <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginBottom: 6 }}>
+                {progress.received} / {progress.total} Segmente
+              </div>
+              <div style={{ height: 3, background: 'var(--bd-default)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 2, background: 'var(--blue)',
+                  width: `${Math.round(progress.received / progress.total * 100)}%`,
+                  transition: 'width 0.3s',
+                }} />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

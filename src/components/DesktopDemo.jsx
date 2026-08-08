@@ -38,11 +38,14 @@ function ImageUpload({ images, onChange }) {
     const files = Array.from(e.target.files);
     files.forEach((file) => {
       const reader = new FileReader();
-      reader.onload = (ev) => {
+      reader.onload = async (ev) => {
+        // Resize to ≤480 px JPEG so it stays under Ably's 65 KB message limit
+        const resized = await resizeImage(ev.target.result);
+        const approxSize = Math.round(resized.length * 0.75); // base64 → bytes estimate
         onChange((prev) => [...prev, {
           id: `img_${Date.now()}_${Math.random().toString(36).slice(2,5)}`,
-          file, dataUrl: ev.target.result,
-          type: file.type, size: file.size,
+          file, dataUrl: resized,
+          type: 'image/jpeg', size: approxSize,
           name: file.name,
         }]);
       };
@@ -94,23 +97,52 @@ function ImageUpload({ images, onChange }) {
   );
 }
 
+// iOS Safari needs audio/mp4, Chrome uses audio/webm — pick best available
+function getBestAudioMime() {
+  const candidates = [
+    'audio/mp4;codecs=mp4a.40.2',  // AAC-LC — plays on iOS ✓
+    'audio/mp4',
+    'audio/webm;codecs=opus',
+    'audio/webm',
+  ];
+  return candidates.find((t) => { try { return MediaRecorder.isTypeSupported(t); } catch { return false; } }) || '';
+}
+
+// Resize & compress image to stay under Ably's 65 KB message limit
+async function resizeImage(dataUrl, maxPx = 480, quality = 0.70) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width  = Math.round(img.width  * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
 function AudioRecorder({ audio, onAudio }) {
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const mrRef   = useRef(null);
+  const mrRef    = useRef(null);
   const timerRef = useRef(null);
 
   const start = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
+      const stream   = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = getBestAudioMime();
+      const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       const chunks = [];
       mr.ondataavailable = (e) => chunks.push(e.data);
       mr.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const type = mr.mimeType || mimeType || 'audio/webm';
+        const blob = new Blob(chunks, { type });
         const reader = new FileReader();
         reader.onload = (ev) => {
-          onAudio({ blob, dataUrl: ev.target.result, type: 'audio/webm', duration: elapsed, size: blob.size });
+          onAudio({ blob, dataUrl: ev.target.result, type, duration: elapsed, size: blob.size });
         };
         reader.readAsDataURL(blob);
         stream.getTracks().forEach((t) => t.stop());
@@ -578,12 +610,12 @@ export default function DesktopDemo() {
     return () => clearTimeout(genTimer.current);
   }, [userData, timeline, sessionId, timelineDays]);
 
-  // ─ Re-send data whenever it changes and phone is already connected ─
-  useEffect(() => {
-    if (!wsConnected || !connRef.current) return;
+  // Manual re-send (called from button)
+  const handleResend = () => {
+    if (!connRef.current) return;
     const payload = buildPayload({ ...userData, sessionId }, timelineDays);
     sendPayload(connRef.current, payload);
-  }, [userData, timelineDays, wsConnected, sessionId]);
+  };
 
   // ─ Reset ─
   const handleReset = () => {
@@ -884,11 +916,21 @@ export default function DesktopDemo() {
       }}>
         <span className="label">
           {wsConnected
-            ? 'Smartphone verbunden — Daten werden live übertragen'
+            ? 'Smartphone verbunden'
             : hasAblyKey()
             ? 'Ably verbunden · QR-Code anklicken → Scan-QR erscheint'
             : 'VITE_ABLY_KEY fehlt — Ably API Key in Vercel + .env.local eintragen'}
         </span>
+
+        {wsConnected && (
+          <button className="btn btn-blue" onClick={handleResend} style={{ marginLeft:8 }}>
+            <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+            </svg>
+            Daten neu senden
+          </button>
+        )}
 
         <div style={{ display:'flex', gap:12, marginLeft:'auto', alignItems:'center' }}>
           <span style={{ fontFamily:'var(--f-mono)', fontSize:10, color:'var(--tx-dim)' }}>
