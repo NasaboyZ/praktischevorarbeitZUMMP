@@ -9,7 +9,7 @@ export function buildDataModel(userData, timelineDays = 1) {
   const baseDate = date ? new Date(date) : new Date();
 
   const entries = [];
-  for (let i = 0; i < Math.min(timelineDays, 365 * 10); i++) {
+  for (let i = 0; i < Math.min(timelineDays, 365); i++) {
     const d = new Date(baseDate);
     d.setDate(d.getDate() - i);
     const iso = d.toISOString().split('T')[0];
@@ -93,20 +93,18 @@ export function formatSize(bytes) {
 }
 
 export function getTimelineDays(sliderValue) {
-  // Slider 0-100 maps to 1 day – 3650 days (10 years) exponentially
+  // Slider 0-100 maps to 1 day – 365 days (1 year) exponentially
   if (sliderValue <= 0)   return 1;
-  if (sliderValue >= 100) return 3650;
+  if (sliderValue >= 100) return 365;
   const v = sliderValue / 100;
-  return Math.round(Math.exp(v * Math.log(3650)));
+  return Math.round(Math.exp(v * Math.log(365)));
 }
 
 export function formatTimeline(days) {
-  if (days <= 1)    return '1 Tag';
-  if (days <= 7)    return `${days} Tage`;
-  if (days <= 30)   return `${Math.round(days / 7)} Wochen`;
-  if (days <= 365)  return `${Math.round(days / 30)} Monate`;
-  const y = days / 365;
-  return y < 2 ? '1 Jahr' : `${Math.round(y)} Jahre`;
+  if (days <= 1)   return '1 Tag';
+  if (days <= 7)   return `${days} Tage`;
+  if (days <= 30)  return `${Math.round(days / 7)} Wochen`;
+  return `${Math.round(days / 30)} Monate`;
 }
 
 // QR max capacity in bytes per error correction level (Version 40)
