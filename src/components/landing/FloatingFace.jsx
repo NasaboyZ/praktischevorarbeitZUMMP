@@ -10,7 +10,7 @@ export default function FloatingFace({ src, alt, top, left, size, delay = 0, dur
       <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: delay + 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: delay + 0.4, duration: 0.6, ease: [0.20, 1, 0.3, 1] }}
       >
         <motion.img
           src={src}

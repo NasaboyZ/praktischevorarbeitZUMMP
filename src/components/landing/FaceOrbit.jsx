@@ -7,15 +7,15 @@ import FloatingFace from './FloatingFace';
 
 
 const FACES = [
-  { src: orangeFace, alt: 'Schockierter oranger Smiley', top: '60%', left: '23%',   size: '10.6%', delay: 0,   duration: 4.2 },
-  { src: redFace,    alt: 'Schockierter roter Smiley',   top: '60%', left: '75.5%', size: '10.6%', delay: 0.5, duration: 4.6 },
-  { src: purpleFace, alt: 'Trauriger violetter Smiley',  top: '84%', left: '13%',   size: '9.2%',  delay: 1.1, duration: 5.0 },
-  { src: greenFace,  alt: 'Fröhlicher grüner Smiley',    top: '84%', left: '86%',   size: '9.2%',  delay: 0.8, duration: 4.4 },
+  { src: orangeFace, alt: 'Schockierter oranger Smiley', top: '10.1%', left: '23%',   size: '10.6%', delay: 0,   duration: 4.2 },
+  { src: redFace,    alt: 'Schockierter roter Smiley',   top: '9%',    left: '75.5%', size: '10.6%', delay: 0.5, duration: 4.6 },
+  { src: purpleFace, alt: 'Trauriger violetter Smiley',  top: '40.9%', left: '13%',   size: '9.2%',  delay: 1.1, duration: 5.0 },
+  { src: greenFace,  alt: 'Fröhlicher grüner Smiley',    top: '39%', left: '86%',   size: '9.2%',  delay: 0.8, duration: 4.4 },
 ];
 
 export default function FaceOrbit() {
   return (
-    <div className="relative mx-auto w-full max-w-225" style={{ aspectRatio: '1439 / 1017' }}>
+    <div className="relative mx-auto w-full max-w-225" style={{ aspectRatio: '1439 / 1316' }}>
       <img
         src={frame}
         alt=""
