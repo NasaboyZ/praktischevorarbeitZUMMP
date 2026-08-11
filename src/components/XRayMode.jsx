@@ -35,7 +35,7 @@ export default function XRayMode({ colorQR, normalQR, dataSize, sessionId, onClo
           padding: '18px 24px',
           borderBottom: '1px solid var(--bd-subtle)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: 'rgba(6,10,20,0.6)',
+          background: 'var(--bg-surface)',
         }}>
           <div>
             <div className="label label-blue">X-Ray Modus</div>

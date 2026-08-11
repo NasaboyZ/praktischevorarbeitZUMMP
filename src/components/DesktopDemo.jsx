@@ -644,7 +644,7 @@ export default function DesktopDemo() {
         display:'flex', alignItems:'center', justifyContent:'space-between',
         padding:'14px 28px',
         borderBottom:'1px solid var(--bd-subtle)',
-        background:'rgba(9,14,28,0.95)',
+        background:'rgba(255,255,255,0.95)',
         backdropFilter:'blur(12px)',
         gap:16,
       }}>
@@ -910,7 +910,7 @@ export default function DesktopDemo() {
         position:'relative', zIndex:10,
         padding:'10px 28px',
         borderTop:'1px solid var(--bd-subtle)',
-        background:'rgba(9,14,28,0.95)',
+        background:'rgba(255,255,255,0.95)',
         backdropFilter:'blur(12px)',
         display:'flex', alignItems:'center', gap:20, flexWrap:'wrap',
       }}>
