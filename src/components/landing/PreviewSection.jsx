@@ -3,13 +3,13 @@ import Badge from './Badge';
 
 export default function PreviewSection() {
   return (
-    <section id="vorschau" style={{ background: '#F4F8FF', padding: '90px 40px', textAlign: 'center' }}>
-      <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+    <section id="vorschau" className="bg-[#F4F8FF] px-10 py-22.5 text-center">
+      <div className="mx-auto max-w-270">
         <InView>
           <div>
-            <Badge style={{ margin: '0 auto 16px' }}>Vorschau</Badge>
-            <h2 style={{ fontSize: 36, fontWeight: 800, marginBottom: 12 }}>So sieht das Demo aus</h2>
-            <p style={{ color: '#4B607D', fontSize: 16, marginBottom: 48, lineHeight: 1.7 }}>
+            <Badge className="mx-auto mb-4">Vorschau</Badge>
+            <h2 className="mb-3 text-[36px] font-extrabold">So sieht das Demo aus</h2>
+            <p className="mb-12 text-base leading-[1.7] text-(--tx-secondary)">
               Desktop: Daten eingeben &amp; QR generieren — Smartphone: alle Ebenen live empfangen.
             </p>
           </div>

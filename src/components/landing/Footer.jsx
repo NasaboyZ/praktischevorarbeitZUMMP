@@ -1,20 +1,14 @@
 export default function Footer() {
   return (
-    <footer style={{ background: '#0D1117', padding: '28px 40px' }}>
-      <div style={{
-        maxWidth: 1080, margin: '0 auto',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: 6,
-            background: 'linear-gradient(135deg, #FF5757 0%, #22C55E 50%, #3B8AFF 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, color: '#fff', fontSize: 13,
-          }}>Q</div>
-          <span style={{ color: '#4B607D', fontSize: 13 }}>Multi-Layer QR Code · Bachelorarbeit Demo</span>
+    <footer className="bg-[#0D1117] px-10 py-7">
+      <div className="mx-auto flex max-w-270 flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-6.5 w-6.5 items-center justify-center rounded-md bg-[linear-gradient(135deg,#FF5757_0%,#22C55E_50%,#3B8AFF_100%)] text-[13px] font-black text-white">
+            Q
+          </div>
+          <span className="text-[13px] text-(--tx-secondary)">Multi-Layer QR Code · Bachelorarbeit Demo</span>
         </div>
-        <span style={{ color: '#2D3E55', fontSize: 12, fontFamily: 'monospace' }}>
+        <span className="font-mono text-xs text-[#2D3E55]">
           Demo-Prototyp · Nur für Forschungszwecke
         </span>
       </div>

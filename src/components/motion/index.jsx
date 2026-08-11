@@ -10,6 +10,7 @@ export function InView({
   transition,
   viewOptions = { once: true, margin: '0px 0px -80px 0px' },
   style,
+  className,
   as = 'div',
 }) {
   const ref = useRef(null);
@@ -32,6 +33,7 @@ export function InView({
       variants={variants ?? defaultVariants}
       transition={transition ?? { duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       style={style}
+      className={className}
     >
       {children}
     </MotionEl>

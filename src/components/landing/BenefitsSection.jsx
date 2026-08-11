@@ -13,41 +13,36 @@ const BENEFITS = [
 
 export default function BenefitsSection() {
   return (
-    <section id="warum" style={{ background: '#FFFFFF', padding: '90px 40px' }}>
-      <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+    <section id="warum" className="bg-white px-10 py-22.5">
+      <div className="mx-auto max-w-270">
         <InView>
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <Badge style={{ margin: '0 auto 16px' }}>Relevanz</Badge>
-            <h2 style={{ fontSize: 40, fontWeight: 800, marginBottom: 14 }}>
+          <div className="mb-14 text-center">
+            <Badge className="mx-auto mb-4">Relevanz</Badge>
+            <h2 className="mb-3.5 text-4xl font-extrabold">
               Warum Mental Health<br />von diesem Ansatz profitiert
             </h2>
-            <p style={{ color: '#4B607D', fontSize: 16, maxWidth: 560, margin: '0 auto', lineHeight: 1.7 }}>
+            <p className="mx-auto max-w-140 text-base leading-[1.7] text-(--tx-secondary)">
               Emotionale Daten sind hochsensibel. Mein Konzept zeigt, wie reichhaltige
               private Daten ohne Kompromisse übertragen werden können.
             </p>
           </div>
         </InView>
 
-        <AnimatedGroup preset="zoom" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+        <AnimatedGroup preset="zoom" className="grid grid-cols-3 gap-6">
           {BENEFITS.map(({ icon, color, title, stat, desc }) => (
             <motion.div
               key={title}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
-              style={{
-                padding: '36px 28px', textAlign: 'center',
-                background: '#F7F9FD', borderRadius: 16, border: '1px solid #E4EDF6',
-              }}
+              className="rounded-2xl border border-[#E4EDF6] bg-[#F7F9FD] px-7 py-9 text-center"
             >
-              <div style={{ fontSize: 44, marginBottom: 16 }}>{icon}</div>
-              <div style={{ fontWeight: 800, fontSize: 20, marginBottom: 12 }}>{title}</div>
-              <div style={{ fontSize: 14, color: '#4B607D', lineHeight: 1.7, marginBottom: 22 }}>{desc}</div>
-              <div style={{
-                display: 'inline-block', padding: '7px 20px', borderRadius: 100,
-                background: `${color}12`, color,
-                fontWeight: 800, fontSize: 18, fontFamily: 'Roboto Mono, monospace',
-                border: `1px solid ${color}25`,
-              }}>{stat}</div>
+              <div className="mb-4 text-[44px]">{icon}</div>
+              <div className="mb-3 text-xl font-extrabold">{title}</div>
+              <div className="mb-5.5 text-sm leading-[1.7] text-(--tx-secondary)">{desc}</div>
+              <div
+                className="inline-block rounded-full px-5 py-1.75 font-mono text-lg font-extrabold"
+                style={{ background: `${color}12`, color, border: `1px solid ${color}25` }}
+              >{stat}</div>
             </motion.div>
           ))}
         </AnimatedGroup>

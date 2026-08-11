@@ -9,16 +9,14 @@ const STATS = [
 
 export default function StatsSection() {
   return (
-    <section style={{ background: '#111827', padding: '56px 40px' }}>
-      <AnimatedGroup preset="slide" style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center' }}>
+    <section className="bg-(--tx-primary) px-10 py-14">
+      <AnimatedGroup preset="slide" className="mx-auto grid max-w-225 grid-cols-4 gap-6 text-center">
         {STATS.map(({ value, label }) => (
           <div key={label}>
-            <div style={{
-              fontSize: 44, fontWeight: 800,
-              background: 'linear-gradient(135deg, #3B8AFF, #00C4D9)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>{value}</div>
-            <div style={{ fontSize: 13, color: '#8A9FBD', marginTop: 6 }}>{label}</div>
+            <div className="bg-linear-to-br from-(--blue) to-(--cyan) bg-clip-text text-[44px] font-extrabold text-transparent">
+              {value}
+            </div>
+            <div className="mt-1.5 text-[13px] text-(--tx-muted)">{label}</div>
           </div>
         ))}
       </AnimatedGroup>
