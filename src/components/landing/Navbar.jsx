@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Menu as MenuIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
-import Logo from './Logo';
 
 const SECTIONS = [
   { id: 'konzept', label: 'Das Konzept' },
@@ -21,9 +20,7 @@ export default function Navbar({ onStart }) {
   };
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-100 flex items-center justify-between border-b border-(--bd-subtle) bg-white/90 px-6 py-3 backdrop-blur-xl md:px-10">
-      <Logo />
-
+    <nav className="fixed inset-x-0 top-0 z-100 flex items-center justify-center bg-white/90 px-6 py-3 backdrop-blur-xl md:px-10">
       <div className="relative">
         <Button
           onClick={() => setOpen((v) => !v)}

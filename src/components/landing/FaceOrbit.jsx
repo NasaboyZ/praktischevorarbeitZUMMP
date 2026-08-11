@@ -5,9 +5,7 @@ import greenFace from '../../assets/hero-Smiles/gruenesgesicht-emoji.png';
 import purpleFace from '../../assets/hero-Smiles/vieloutes-gesicht.png';
 import FloatingFace from './FloatingFace';
 
-// frame.png is a 1439×1316 canvas, but the artwork only fills y:0–1017 —
-// the rest is transparent padding. We crop to that with object-fit:cover
-// and size the faces off the same coordinate space so they land on the arc.
+
 const FACES = [
   { src: orangeFace, alt: 'Schockierter oranger Smiley', top: '60%', left: '23%',   size: '10.6%', delay: 0,   duration: 4.2 },
   { src: redFace,    alt: 'Schockierter roter Smiley',   top: '60%', left: '75.5%', size: '10.6%', delay: 0.5, duration: 4.6 },

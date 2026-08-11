@@ -1,6 +1,5 @@
 import { motion } from 'motion/react';
 import { InView, AnimatedGroup } from './motion/index.jsx';
-import Navbar from './landing/Navbar';
 import Hero from './landing/Hero';
 
 // ── Decorative mini QR mocks ───────────────────────────────────────────────
@@ -108,12 +107,11 @@ export default function LandingPage({ onStart }) {
   return (
     <div style={{ background: '#FFFFFF', color: '#111827', fontFamily: 'Inter, system-ui, sans-serif', overflowX: 'hidden' }}>
 
-      <Navbar onStart={onStart} />
       <Hero onStart={onStart} />
 
       {/* ── Was ist Multi-Layer QR? ── */}
       <section id="konzept" style={{ background: '#FFFFFF', padding: '90px 40px' }}>
-        <div style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}> 
 
           <InView>
             <div>
