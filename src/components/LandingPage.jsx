@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
-import { InView, AnimatedGroup, TextEffect } from './motion/index.jsx';
-import trackingScreen from '../assets/tracking-screen.png';
+import { InView, AnimatedGroup } from './motion/index.jsx';
+import Navbar from './landing/Navbar';
+import Hero from './landing/Hero';
 
 // ── Decorative mini QR mocks ───────────────────────────────────────────────
 const QR_PATTERN = [
@@ -71,17 +72,6 @@ const BADGE = {
   letterSpacing: '0.10em', textTransform: 'uppercase', fontWeight: 600,
 };
 
-const EMOJIS = [
-  { e: '😞', top: '22%', left: '7%',   size: 52, delay: 0,    dur: 4.2 },
-  { e: '😕', top: '12%', left: '20%',  size: 38, delay: 0.8,  dur: 5.0 },
-  { e: '😐', top: '28%', right: '18%', size: 44, delay: 1.4,  dur: 4.6 },
-  { e: '😊', top: '10%', right: '7%',  size: 56, delay: 0.3,  dur: 3.8 },
-  { e: '😄', bottom: '28%', left: '9%',   size: 48, delay: 2.0, dur: 4.4 },
-  { e: '😌', bottom: '32%', right: '8%',  size: 42, delay: 1.1, dur: 5.2 },
-  { e: '🧠', top: '42%', left: '4%',   size: 34, delay: 1.7,  dur: 6.0 },
-  { e: '💙', top: '55%', right: '5%',  size: 30, delay: 0.6,  dur: 4.8 },
-];
-
 const STEPS = [
   { step: 1, emoji: '✍️', color: '#FF7E6B', bg: 'rgba(255,126,107,0.06)', border: 'rgba(255,126,107,0.20)',
     title: 'Stimmung eingeben',
@@ -118,166 +108,11 @@ export default function LandingPage({ onStart }) {
   return (
     <div style={{ background: '#FFFFFF', color: '#111827', fontFamily: 'Inter, system-ui, sans-serif', overflowX: 'hidden' }}>
 
-      {/* ── Sticky Nav ── */}
-      <motion.nav
-        initial={{ y: -60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 40px',
-          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)',
-          borderBottom: '1px solid #E4EDF6',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: 7,
-            background: 'linear-gradient(135deg, #FF5757 0%, #22C55E 50%, #3B8AFF 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 900, color: '#fff', fontSize: 15,
-          }}>Q</div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 13, letterSpacing: '0.06em' }}>MULTI-LAYER QR</div>
-            <div style={{ fontSize: 9, color: '#8A9FBD', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'monospace' }}>
-              Bachelorarbeit · Demo
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{
-            padding: '4px 12px', borderRadius: 100,
-            background: 'rgba(245,158,11,0.10)', border: '1px solid rgba(245,158,11,0.30)',
-            fontSize: 11, color: '#92400E', fontWeight: 600,
-          }}>⚡ Nur Demo</div>
-          <motion.button
-            onClick={onStart}
-            whileHover={{ scale: 1.04, boxShadow: '0 6px 24px rgba(59,138,255,0.40)' }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              padding: '8px 22px', borderRadius: 100,
-              background: 'linear-gradient(135deg, #3B8AFF, #00C4D9)',
-              border: 'none', color: '#fff',
-              fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(59,138,255,0.30)',
-            }}
-          >Demo starten →</motion.button>
-        </div>
-      </motion.nav>
-
-      {/* ── Hero ── */}
-      <section style={{
-        position: 'relative', minHeight: '100vh',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center',
-        paddingTop: 80, paddingBottom: 60, paddingLeft: 24, paddingRight: 24,
-        overflow: 'hidden',
-        background: 'linear-gradient(180deg, #FFFFFF 0%, #F3F7FF 100%)',
-      }}>
-
-        {/* Floating emojis */}
-        {EMOJIS.map(({ e, size, delay, dur, ...pos }) => (
-          <motion.div
-            key={e}
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: delay + 0.6, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              position: 'absolute', fontSize: size,
-              userSelect: 'none', pointerEvents: 'none',
-              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.08))',
-              ...pos,
-            }}
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: dur, delay: delay, repeat: Infinity, ease: 'easeInOut' }}
-            >{e}</motion.div>
-          </motion.div>
-        ))}
-
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          style={{ ...BADGE, marginBottom: 28 }}
-        >
-          🎓 Masterprojekt · Nur zu Demonstrationszwecken
-        </motion.div>
-
-        {/* Headline */}
-        <div style={{ maxWidth: 800, marginBottom: 20 }}>
-          <TextEffect
-            as="h1"
-            preset="fade-in-blur"
-            delay={0.2}
-            style={{
-              fontSize: 'clamp(36px, 6vw, 72px)',
-              fontWeight: 800, lineHeight: 1.15, margin: 0,
-              background: 'linear-gradient(135deg, #3B8AFF 0%, #00C4D9 55%, #111827 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Stimmung tracken. Multi-Layer QR erleben.
-          </TextEffect>
-        </div>
-
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          style={{ fontSize: 18, color: '#4B607D', lineHeight: 1.75, maxWidth: 580, margin: '0 0 40px' }}
-        >
-          Ein interaktives Demo, das zeigt wie{' '}
-          <strong style={{ color: '#111827' }}>RGB-Farb-Multiplexing</strong> private
-          Mood-Daten sicher überträgt — ohne Server, ohne Cloud, in Echtzeit.
-        </motion.p>
-
-        {/* CTA group */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.5 }}
-          style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center', marginBottom: 32 }}
-        >
-          <motion.button
-            onClick={onStart}
-            whileHover={{ scale: 1.04, boxShadow: '0 12px 40px rgba(59,138,255,0.45)' }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              padding: '15px 36px', borderRadius: 100,
-              background: 'linear-gradient(135deg, #3B8AFF, #00C4D9)',
-              border: 'none', color: '#fff',
-              fontSize: 17, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 8px 32px rgba(59,138,255,0.35)',
-            }}
-          >Demo starten →</motion.button>
-          <div style={{ fontSize: 13, color: '#8A9FBD', fontFamily: 'monospace' }}>
-            Kein Login · Kein Server · 100% Lokal
-          </div>
-        </motion.div>
-
-        {/* Disclaimer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.5 }}
-          style={{
-            padding: '10px 22px', borderRadius: 10,
-            background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.22)',
-            fontSize: 13, color: '#78350F', lineHeight: 1.5, maxWidth: 520,
-          }}
-        >
-          ⚠️ Das Mood-Tracking dient nur zur Veranschaulichung —
-          das eigentliche Konzept ist der <strong>Multi-Layer QR-Code</strong>.
-        </motion.div>
-      </section>
+      <Navbar onStart={onStart} />
+      <Hero onStart={onStart} />
 
       {/* ── Was ist Multi-Layer QR? ── */}
-      <section style={{ background: '#FFFFFF', padding: '90px 40px' }}>
+      <section id="konzept" style={{ background: '#FFFFFF', padding: '90px 40px' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
 
           <InView>
@@ -395,7 +230,7 @@ export default function LandingPage({ onStart }) {
       </section>
 
       {/* ── 4 Steps ── */}
-      <section style={{ background: '#F4F8FF', padding: '90px 40px' }}>
+      <section id="ablauf" style={{ background: '#F4F8FF', padding: '90px 40px' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <InView>
             <div style={{ textAlign: 'center', marginBottom: 56 }}>
@@ -438,7 +273,7 @@ export default function LandingPage({ onStart }) {
       </section>
 
       {/* ── Warum Mental Health? ── */}
-      <section style={{ background: '#FFFFFF', padding: '90px 40px' }}>
+      <section id="warum" style={{ background: '#FFFFFF', padding: '90px 40px' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <InView>
             <div style={{ textAlign: 'center', marginBottom: 56 }}>
@@ -496,7 +331,7 @@ export default function LandingPage({ onStart }) {
       </section>
 
       {/* ── Screenshot ── */}
-      <section style={{ background: '#F4F8FF', padding: '90px 40px', textAlign: 'center' }}>
+      <section id="vorschau" style={{ background: '#F4F8FF', padding: '90px 40px', textAlign: 'center' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto' }}>
           <InView>
             <div>
@@ -506,23 +341,6 @@ export default function LandingPage({ onStart }) {
                 Desktop: Daten eingeben &amp; QR generieren — Smartphone: alle Ebenen live empfangen.
               </p>
             </div>
-          </InView>
-          <InView
-            variants={{ hidden: { opacity: 0, y: 40, scale: 0.97 }, visible: { opacity: 1, y: 0, scale: 1 } }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <img
-              src={trackingScreen}
-              alt="Multi-Layer QR Demo Screenshot"
-              style={{
-                width: '100%', maxWidth: 960, borderRadius: 20,
-                boxShadow: '0 24px 80px rgba(59,138,255,0.12), 0 4px 20px rgba(0,0,0,0.06)',
-                border: '1px solid #E0E9F5',
-              }}
-            />
-            <p style={{ fontSize: 13, color: '#8A9FBD', marginTop: 16, fontFamily: 'monospace' }}>
-              Links: Klassischer QR (Kapazitätslimit) · Mitte: Eingabe-Interface · Rechts: Multiplex-Ergebnis
-            </p>
           </InView>
         </div>
       </section>
