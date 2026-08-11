@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Menu as MenuIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
+// 1. Motion importieren
+import { motion, AnimatePresence } from 'motion/react';
 
 const SECTIONS = [
   { id: 'konzept', label: 'Das Konzept' },
@@ -34,25 +36,35 @@ export default function Navbar({ onStart }) {
           </span>
         </Button>
 
-        {open && (
-          <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-(--bd-subtle) bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]">
-            {SECTIONS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => goTo(s.id)}
-                className="block w-full px-4 py-3 text-left text-sm text-(--tx-secondary) transition-colors hover:bg-(--bg-surface) hover:text-(--tx-primary)"
-              >
-                {s.label}
-              </button>
-            ))}
-            <button
-              onClick={() => { setOpen(false); onStart(); }}
-              className="block w-full border-t border-(--bd-subtle) px-4 py-3 text-left text-sm font-semibold text-(--blue) hover:bg-(--blue-dim)"
+  
+        <AnimatePresence>
+          {open && (
+            /* 3. motion.div mit initial, animate und exit Zuständen */
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute origin-top-right right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-(--bd-subtle) bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]"
             >
-              Demo starten →
-            </button>
-          </div>
-        )}
+              {SECTIONS.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => goTo(s.id)}
+                  className="block w-full px-4 py-3 text-left text-sm text-(--tx-secondary) transition-colors hover:bg-(--bg-surface) hover:text-(--tx-primary)"
+                >
+                  {s.label}
+                </button>
+              ))}
+              <button
+                onClick={() => { setOpen(false); onStart(); }}
+                className="block w-full border-t border-(--bd-subtle) px-4 py-3 text-left text-sm font-semibold text-(--blue) hover:bg-(--blue-dim)"
+              >
+                Demo starten →
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   );
