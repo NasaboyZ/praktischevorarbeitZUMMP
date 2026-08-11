@@ -13,11 +13,11 @@ export default function Logo({ size = 30, showCaption = true, dark = false }) {
         Q
       </div>
       <div>
-        <div className={`text-[13px] font-extrabold tracking-[0.06em] ${dark ? 'text-white' : 'text-[var(--tx-primary)]'}`}>
+        <div className={`text-[13px] font-extrabold tracking-[0.06em] ${dark ? 'text-white' : 'text-(--tx-primary)'}`}>
           MULTI-LAYER QR
         </div>
         {showCaption && (
-          <div className={`font-mono text-[9px] uppercase tracking-[0.12em] ${dark ? 'text-white/40' : 'text-[var(--tx-muted)]'}`}>
+          <div className={`font-mono text-[9px] uppercase tracking-[0.12em] ${dark ? 'text-white/40' : 'text-(--tx-muted)'}`}>
             Bachelorarbeit · Demo
           </div>
         )}

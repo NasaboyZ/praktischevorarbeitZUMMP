@@ -21,7 +21,7 @@ export default function Navbar({ onStart }) {
   };
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-100 flex items-center justify-between border-b border-[var(--bd-subtle)] bg-white/90 px-6 py-3 backdrop-blur-xl md:px-10">
+    <nav className="fixed inset-x-0 top-0 z-100 flex items-center justify-between border-b border-(--bd-subtle) bg-white/90 px-6 py-3 backdrop-blur-xl md:px-10">
       <Logo />
 
       <div className="relative">
@@ -38,19 +38,19 @@ export default function Navbar({ onStart }) {
         </Button>
 
         {open && (
-          <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-[var(--bd-subtle)] bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]">
+          <div className="absolute right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-(--bd-subtle) bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]">
             {SECTIONS.map((s) => (
               <button
                 key={s.id}
                 onClick={() => goTo(s.id)}
-                className="block w-full px-4 py-3 text-left text-sm text-[var(--tx-secondary)] transition-colors hover:bg-[var(--bg-surface)] hover:text-[var(--tx-primary)]"
+                className="block w-full px-4 py-3 text-left text-sm text-(--tx-secondary) transition-colors hover:bg-(--bg-surface) hover:text-(--tx-primary)"
               >
                 {s.label}
               </button>
             ))}
             <button
               onClick={() => { setOpen(false); onStart(); }}
-              className="block w-full border-t border-[var(--bd-subtle)] px-4 py-3 text-left text-sm font-semibold text-[var(--blue)] hover:bg-[var(--blue-dim)]"
+              className="block w-full border-t border-(--bd-subtle) px-4 py-3 text-left text-sm font-semibold text-(--blue) hover:bg-(--blue-dim)"
             >
               Demo starten →
             </button>
