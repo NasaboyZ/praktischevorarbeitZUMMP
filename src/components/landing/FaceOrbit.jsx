@@ -17,7 +17,7 @@ const FACES = [
 
 export default function FaceOrbit() {
   return (
-    <div className="relative mx-auto w-full max-w-[900px]" style={{ aspectRatio: '1439 / 1017' }}>
+    <div className="relative mx-auto w-full max-w-225" style={{ aspectRatio: '1439 / 1017' }}>
       <img
         src={frame}
         alt=""
