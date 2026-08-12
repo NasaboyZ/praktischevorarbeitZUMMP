@@ -303,7 +303,7 @@ export default function ControlCenter({ entries, setEntries, name, setName, data
             <div className="flex flex-col gap-1.5">
               {LAYER_META.map(({ label, color }, i) => (
                 <div key={label} className="flex items-center gap-2">
-                  <div className="h-2 w-2 shrink-0 rounded-[2px]" style={{ background: color }} />
+                  <div className="h-2 w-2 shrink-0 rounded-xs" style={{ background: color }} />
                   <div className="flex-1 font-mono text-[11px] text-(--tx-secondary)">{label}</div>
                   <div className="font-mono text-[11px]" style={{ color }}>
                     {formatSize(layerSizes[i])}

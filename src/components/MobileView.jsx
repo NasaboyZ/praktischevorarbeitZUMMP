@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { connectMobile } from '../lib/ws';
 
 const MOOD_ICONS = ['', '😞', '😕', '😐', '😊', '😄'];
@@ -10,48 +11,84 @@ function formatDate(iso) {
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
+const LAYER_THEMES = [
+  { accent: 'var(--tx-primary)', label: '01', background: '#111827', text: '#FFEB3B' },
+  { accent: '#9D174D', label: '02', background: '#F9A8D4', text: '#111827' },
+  { accent: '#92400E', label: '03', background: '#FEF3C7', text: '#111827' },
+];
+
+function prettifyJson(value) {
+  return JSON.stringify(value, null, 2);
+}
+
+function buildLayerPayloads(model) {
+  if (!model?.entries) return [];
+  const { entries, ...meta } = model;
+  const buckets = [[], [], []];
+  entries.forEach((entry, index) => buckets[index % 3].push(entry));
+  return buckets.map((bucketEntries, index) => ({
+    ...LAYER_THEMES[index],
+    title: `Layer ${String(index + 1).padStart(2, '0')}`,
+    payload: index === 0
+      ? { ...meta, entries: bucketEntries }
+      : { session_id: meta.session_id, entries: bucketEntries },
+    itemCount: bucketEntries.length,
+  }));
+}
+
 // ── Reconstruction animation ───────────────────────────────────────────────
 function Reconstructing({ onDone }) {
   const [step, setStep] = useState(0);
   const steps = ['Layer 1 entschlüsseln', 'Layer 2 entschlüsseln', 'Layer 3 entschlüsseln', 'Medien wiederherstellen', 'Fertig'];
+  const stageRef = useRef(null);
 
   useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.reconstruct-step', { opacity: 0, y: 20, stagger: 0.08, duration: 0.45, ease: 'power3.out' });
+    }, stageRef);
+
     let i = 0;
     const t = setInterval(() => {
       i++;
       setStep(i);
       if (i >= steps.length) { clearInterval(t); setTimeout(onDone, 500); }
-    }, 600);
-    return () => clearInterval(t);
+    }, 700);
+    return () => { clearInterval(t); ctx.revert(); };
   }, [onDone, steps.length]);
 
   return (
-    <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+    <div ref={stageRef} style={{ padding: '40px 24px', textAlign: 'center' }}>
       <div style={{
         fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--blue)',
         letterSpacing: '0.1em', marginBottom: 24,
       }}>
         REKONSTRUIERE DATEN…
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 280, margin: '0 auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 320, margin: '0 auto' }}>
         {steps.map((s, i) => (
-          <div key={s} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '8px 14px', borderRadius: 8,
-            background: i < step ? 'var(--ok-bg)' : i === step ? 'var(--blue-dim)' : 'var(--bg-surface)',
-            border: `1px solid ${i < step ? 'rgba(34,197,94,0.25)' : i === step ? 'rgba(59,138,255,0.35)' : 'var(--bd-subtle)'}`,
-            transition: 'all 0.4s var(--ease)',
-          }}>
-            <span style={{ fontSize: 14 }}>
+          <motion.div
+            key={s}
+            className="reconstruct-step"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: i * 0.07, ease: 'power3.out' }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '12px 16px', borderRadius: 12,
+              background: i < step ? 'rgba(34,197,94,0.12)' : i === step ? 'rgba(59,138,255,0.12)' : 'var(--bg-surface)',
+              border: `1px solid ${i < step ? 'rgba(34,197,94,0.25)' : i === step ? 'rgba(59,138,255,0.35)' : 'var(--bd-subtle)'}`,
+              transition: 'all 0.4s var(--ease)',
+            }}>
+            <span style={{ fontSize: 14, width: 24, textAlign: 'center' }}>
               {i < step ? '✓' : i === step ? '⠿' : '○'}
             </span>
             <span style={{
-              fontFamily: 'var(--f-mono)', fontSize: 11,
+              fontFamily: 'var(--f-mono)', fontSize: 12,
               color: i < step ? 'var(--ok)' : i === step ? 'var(--blue)' : 'var(--tx-dim)',
             }}>
               {s}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -63,6 +100,8 @@ function MemoryCard({ payload }) {
   const { model, mediaData } = payload;
   const latestEntry = model?.entries?.[0];
   const author = model?.author || 'Anonym';
+  const layers = useMemo(() => buildLayerPayloads(model), [model]);
+  const latestAudio = latestEntry?.audio ? mediaData?.[latestEntry.audio.id] : null;
 
   return (
     <div style={{
@@ -89,6 +128,60 @@ function MemoryCard({ payload }) {
       </div>
 
       <div style={{ padding: '20px 16px', maxWidth: 480, margin: '0 auto' }}>
+        {/* Layer distribution */}
+        <div style={{ marginBottom: 22, animation: 'fadeUp 0.45s var(--ease) both' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-secondary)', letterSpacing: '0.14em' }}>
+              MEHRSCHICHTIGE DATEN
+            </div>
+            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-muted)' }}>
+              {model?.entries?.length ?? 0} Einträge verteilt auf 3 Layer
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: 14 }}>
+            {layers.map((layer, index) => (
+              <motion.div
+                key={layer.title}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: index * 0.08, ease: 'power3.out' }}
+                style={{
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  boxShadow: '0 24px 60px rgba(15, 23, 42, 0.08)',
+                  border: '1px solid rgba(15,23,42,0.06)',
+                }}
+              >
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '16px 18px', background: layer.background,
+                }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, letterSpacing: '0.18em', color: layer.accent }}>
+                      {layer.title}
+                    </div>
+                    <div style={{ fontFamily: 'var(--f-display)', fontSize: 18, fontWeight: 800, color: layer.text }}>
+                      {layer.itemCount} Einträge
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)' }}>
+                    {layer.title === 'Layer 01' ? 'Meta + Einträge' : 'Nur Einträge'}
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(15,23,42,0.96)', padding: '14px 16px', overflowX: 'auto' }}>
+                  <pre style={{
+                    margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    fontSize: 11, lineHeight: 1.45, color: '#E5E7EB',
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                  }}>
+                    {prettifyJson(layer.payload)}
+                  </pre>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
         {/* Latest entry */}
         {latestEntry && (
           <div style={{
@@ -159,7 +252,7 @@ function MemoryCard({ payload }) {
             )}
 
             {/* Audio */}
-            {latestEntry.audio && mediaData?.['audio_001'] && (
+            {latestEntry.audio && latestAudio && (
               <div style={{ padding: '0 16px 14px' }}>
                 <div className="label" style={{ marginBottom: 8 }}>SPRACHMEMO</div>
                 <div style={{
@@ -168,7 +261,7 @@ function MemoryCard({ payload }) {
                   display: 'flex', alignItems: 'center', gap: 12,
                 }}>
                   <span style={{ fontSize: 18 }}>🎙</span>
-                  <audio controls src={mediaData['audio_001'].dataUrl} style={{ flex: 1, height: 32 }} />
+                  <audio controls src={latestAudio.dataUrl} style={{ flex: 1, height: 32 }} />
                   <span style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', flexShrink: 0 }}>
                     {latestEntry.audio.duration}s
                   </span>
@@ -201,6 +294,10 @@ function MemoryCard({ payload }) {
                         {entry.text.slice(0, 60)}{entry.text.length > 60 ? '…' : ''}
                       </div>
                     )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, fontSize: 11, color: 'var(--tx-muted)' }}>
+                      <span>{entry.images?.length ? `${entry.images.length} Foto${entry.images.length > 1 ? 's' : ''}` : 'Keine Fotos'}</span>
+                      <span>{entry.audio ? 'Audio vorhanden' : 'Kein Audio'}</span>
+                    </div>
                   </div>
                   <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 600 }}>
                     {entry.mood}/5
