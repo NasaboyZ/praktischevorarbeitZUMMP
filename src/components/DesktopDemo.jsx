@@ -9,12 +9,14 @@ import ControlCenter from './desktop-demo/ControlCenter';
 import NormalQRPanel from './desktop-demo/NormalQRPanel';
 import MultiLayerQRPanel from './desktop-demo/MultiLayerQRPanel';
 
+
 const INITIAL_USER_DATA = () => ({
   name: '', moods: [], location: [], text: '', images: [], audio: null,
   date: new Date().toISOString().split('T')[0],
 });
 
 export default function DesktopDemo() {
+  
   // ─ State ─
   const [sessionId]    = useState(generateSessionId);
   const [userData, setUserData] = useState(INITIAL_USER_DATA);
