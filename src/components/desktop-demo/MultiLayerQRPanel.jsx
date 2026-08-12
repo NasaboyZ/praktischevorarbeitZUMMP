@@ -55,7 +55,7 @@ export default function MultiLayerQRPanel({
         <div className="flex items-center justify-between py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Datenkapazität</span>
           <span className="font-bold" style={{ color: LEVEL_COLOR[capacity.level] }}>
-            {formatSize(dataSize)} / {formatSize(MLQR_CAPACITY)}
+            {formatSize(dataSize)} 
           </span>
         </div>
         <div className="flex items-center justify-between py-3.5 text-sm">

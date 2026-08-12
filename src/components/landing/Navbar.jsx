@@ -30,7 +30,7 @@ export default function Navbar({ onStart, onHome, mode = 'landing' }) {
           className="h-10 gap-3 rounded-full pl-4 pr-1.5"
         >
           {open ? <X className="size-4" /> : <MenuIcon className="size-4" />}
-          <span className="text-[13px] font-semibold">Menü</span>
+          <span className="text-[13px] font-semibold p-2">Menü</span>
           {!inDemo && (
             <span className="rounded-full bg-white/15 px-2.5 py-1 font-mono text-[11px] tabular-nums">
               {progress}%
