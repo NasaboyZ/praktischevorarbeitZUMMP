@@ -4,8 +4,27 @@ export function generateSessionId() {
   return Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+// 'YYYY-MM-DD' <-> local Date, avoiding the UTC-parsing day-shift bug of `new Date(isoString)`
+export function isoToLocalDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function localDateToIso(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+// Rotating fallback moods for simulated historical entries (stress-test timeline only)
+const SIMULATED_MOODS = [
+  ['entspannt'], ['zufrieden', 'dankbar'], ['gestresst'], ['aufgeregt'],
+  ['traurig'], ['zufrieden'], ['genervt', 'wuetend'],
+];
+
 export function buildDataModel(userData, timelineDays = 1) {
-  const { name, mood, text, images, audio, date } = userData;
+  const { name, moods, location, text, images, audio, date } = userData;
   const baseDate = date ? new Date(date) : new Date();
 
   const entries = [];
@@ -16,14 +35,17 @@ export function buildDataModel(userData, timelineDays = 1) {
 
     if (i === 0) {
       // Real entry from user input
-      const entry = { date: iso, mood, text: text || '' };
+      const entry = { date: iso, moods: moods || [], location: location || [], text: text || '' };
       if (images.length) entry.images = images.map((img) => ({ id: img.id, type: img.type, size: img.size }));
       if (audio)          entry.audio = { id: 'audio_001', type: audio.type, duration: audio.duration };
       entries.push(entry);
     } else {
       // Simulated historical entries
-      const m = [4, 3, 5, 4, 2, 5, 3][i % 7];
-      entries.push({ date: iso, mood: m, text: i < 30 ? `Simulated entry for day ${i}` : '' });
+      entries.push({
+        date: iso,
+        moods: SIMULATED_MOODS[i % SIMULATED_MOODS.length],
+        text: i < 30 ? `Simulated entry for day ${i}` : '',
+      });
     }
   }
 
