@@ -2,14 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { connectMobile } from '../lib/ws';
 
-// shadcn UI & Icons
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Image as ImageIcon, Mic, Database } from "lucide-react";
-
 const MOOD_ICONS = ['', '😞', '😕', '😐', '😊', '😄'];
+const MOOD_LABELS = ['', 'Schlecht', 'Weniger gut', 'Okay', 'Gut', 'Fantastisch'];
 
 function formatDate(iso) {
   if (!iso) return '';
@@ -18,7 +12,7 @@ function formatDate(iso) {
 }
 
 const LAYER_THEMES = [
-  { accent: '#3b82f6', label: '01', background: '#111827', text: '#FFEB3B' },
+  { accent: 'var(--tx-primary)', label: '01', background: '#111827', text: '#FFEB3B' },
   { accent: '#9D174D', label: '02', background: '#F9A8D4', text: '#111827' },
   { accent: '#92400E', label: '03', background: '#FEF3C7', text: '#111827' },
 ];
@@ -50,8 +44,8 @@ function Reconstructing({ onDone }) {
     { label: '01', background: '#111827', color: '#FFEB3B' },
     { label: '02', background: '#F9A8D4', color: '#111827' },
     { label: '03', background: '#FEF3C7', color: '#111827' },
-    { label: '04', background: '#3b82f6', color: '#ffffff' },
-    { label: '05', background: '#22c55e', color: '#ffffff' },
+    { label: '04', background: '#9DD5FF', color: '#111827' },
+    { label: '05', background: '#9DD5FF', color: '#111827' },
   ];
 
   useEffect(() => {
@@ -65,42 +59,49 @@ function Reconstructing({ onDone }) {
   }, [onDone, steps.length]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-linear-to-b from-blue-50/50 to-background">
-      <div className="font-mono text-[13px] text-blue-500 tracking-widest mb-8">
+    <div style={{ padding: '40px 24px', textAlign: 'center', background: 'linear-gradient(180deg, rgba(190,227,255,0.35) 0%, rgba(255,255,255,0.95) 100%)' }}>
+      <div style={{
+        fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--blue)',
+        letterSpacing: '0.1em', marginBottom: 24,
+      }}>
         REKONSTRUKTION STARTET
       </div>
-      <div className="flex flex-col gap-3 w-full max-w-[320px]">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320, margin: '0 auto' }}>
         {steps.map((s, i) => (
           <motion.div
             key={s}
+            className="reconstruct-step"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: i <= step ? 1 : 0.5, y: 0 }}
-            transition={{ duration: 0.45, delay: i * 0.07, ease: 'easeOut' }}
-            className={`flex flex-col gap-3 p-4 rounded-2xl bg-background border shadow-xs transition-all duration-300 ${i <= step ? 'border-border' : 'border-transparent'}`}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <div className="font-mono text-xs tracking-wider text-foreground">
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: i * 0.07, ease: 'power3.out' }}
+            style={{
+              display: 'flex', flexDirection: 'column', gap: 12,
+              padding: '16px 18px', borderRadius: 18,
+              background: 'rgba(255,255,255,0.96)',
+              border: '1px solid rgba(15,23,42,0.08)',
+              boxShadow: '0 24px 48px rgba(15,23,42,0.08)',
+              transition: 'all 0.3s var(--ease)',
+              opacity: i <= step ? 1 : 0.5,
+            }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, letterSpacing: '0.14em', color: 'var(--tx-primary)' }}>
                 {s}
               </div>
-              <span className="font-mono text-xs font-bold text-muted-foreground">
+              <span style={{ fontFamily: 'var(--f-mono)', fontSize: 12, fontWeight: 700, color: 'var(--tx-muted)' }}>
                 {bars[i].label}
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-12 h-7 rounded-full flex items-center justify-center" 
-                style={{ background: bars[i].background }}
-              >
-                <span className="text-xs font-bold" style={{ color: bars[i].color }}>{bars[i].label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 48, height: 28, borderRadius: 14, background: bars[i].background, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: bars[i].color }}>{bars[i].label}</span>
               </div>
-              <div className="flex-1 h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <div 
-                  className="h-full rounded-full transition-all duration-300 ease-out"
-                  style={{ 
-                    width: i <= step ? '100%' : '0%', 
-                    background: bars[i].background 
-                  }} 
-                />
+              <div style={{ flex: 1, height: 10, borderRadius: 999, background: 'rgba(15,23,42,0.08)' }}>
+                <div style={{
+                  width: i <= step ? '100%' : '0%',
+                  height: '100%', borderRadius: 999,
+                  background: bars[i].background,
+                  transition: 'width 0.35s ease',
+                }} />
               </div>
             </div>
           </motion.div>
@@ -114,161 +115,306 @@ function Reconstructing({ onDone }) {
 function MemoryCard({ payload }) {
   const { model, mediaData } = payload;
   const entries = model?.entries ?? [];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedEntry = entries[selectedIndex];
   const author = model?.author || 'Anonym';
   const layers = useMemo(() => buildLayerPayloads(model), [model]);
+  const selectedAudio = selectedEntry?.audio ? mediaData?.[selectedEntry.audio.id] : null;
 
   return (
-    <div className="min-h-screen bg-background pb-12 overflow-x-hidden">
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--bg-deep)',
+      padding: '0 0 40px',
+    }}>
       {/* Header */}
-      <div className="px-5 py-6 bg-linear-to-br from-blue-500/10 to-green-500/5 border-b text-center">
-        <p className="font-mono text-[10px] text-green-600 dark:text-green-400 tracking-widest mb-1">
+      <div style={{
+        padding: '16px 20px',
+        background: 'linear-gradient(135deg, rgba(59,138,255,0.15) 0%, rgba(34,217,122,0.08) 100%)',
+        borderBottom: '1px solid var(--bd-subtle)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--ok)', letterSpacing: '0.15em', marginBottom: 4 }}>
           ✓ REKONSTRUKTION ERFOLGREICH
-        </p>
-        <h1 className="text-2xl font-extrabold text-foreground">{author}</h1>
-        <p className="font-mono text-xs text-muted-foreground mt-1">
+        </div>
+        <div style={{ fontFamily: 'var(--f-display)', fontSize: 24, fontWeight: 800, color: 'var(--tx-primary)' }}>
+          {author}
+        </div>
+        <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-muted)', marginTop: 2 }}>
           Mood Memory — Session {model?.session_id}
-        </p>
+        </div>
       </div>
 
-      <div className="max-w-md mx-auto mt-6 space-y-8">
-        
-        {/* Entries Carousel */}
-        {entries.length > 0 && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="px-5 mb-3 flex items-center justify-between">
-              <h2 className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Deine Einträge
-              </h2>
-              <span className="text-xs text-muted-foreground">{entries.length} Tage</span>
+      <div style={{ padding: '20px 16px', maxWidth: 480, margin: '0 auto' }}>
+        <div style={{
+          padding: '16px 18px',
+          marginBottom: 20,
+          borderRadius: 20,
+          background: 'linear-gradient(135deg, rgba(59,138,255,0.12) 0%, rgba(249,168,212,0.12) 100%)',
+          border: '1px solid rgba(59,138,255,0.16)',
+        }}>
+          <div style={{ fontSize: 11, fontFamily: 'var(--f-mono)', color: 'var(--tx-secondary)', marginBottom: 6 }}>
+            ZUSAMMENGEFÜHRTE LAYER
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {layers.map((layer) => (
+              <span key={layer.title} style={{
+                padding: '8px 12px', borderRadius: 999,
+                background: 'rgba(255,255,255,0.92)',
+                color: layer.text,
+                fontWeight: 700,
+                fontSize: 12,
+                boxShadow: '0 8px 22px rgba(15,23,42,0.08)',
+              }}>
+                {layer.title}
+              </span>
+            ))}
+          </div>
+          <div style={{ marginTop: 12, fontSize: 12, color: 'var(--tx-muted)' }}>
+            Die mobile Ansicht zeigt dir jetzt alle drei Layer payloads und ihre zusammengeführten Einträge.
+          </div>
+        </div>
+        {/* Layer distribution */}
+        <div style={{ marginBottom: 22, animation: 'fadeUp 0.45s var(--ease) both' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-secondary)', letterSpacing: '0.14em' }}>
+              MEHRSCHICHTIGE DATEN
             </div>
-            
-            <Carousel opts={{ align: "center", dragFree: true }} className="w-full">
-              <CarouselContent className="-ml-4">
-                {entries.map((entry) => {
-                  const selectedAudio = entry.audio ? mediaData?.[entry.audio.id] : null;
-                  
-                  return (
-                    <CarouselItem key={entry.date} className="pl-4 basis-[90%] sm:basis-[85%]">
-                      <Card className="h-full border-border/50 shadow-md bg-card/50 backdrop-blur-sm flex flex-col">
-                        <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Calendar className="w-4 h-4" />
-                              <span className="text-sm font-medium">{formatDate(entry.date)}</span>
-                            </div>
-                            <Badge variant="secondary" className="flex gap-1.5 items-center font-mono">
-                              <span className="text-base">{MOOD_ICONS[entry.mood] || '•'}</span>
-                              <span>{entry.mood != null ? `${entry.mood}/5` : '-'}</span>
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        
-                        <CardContent className="pt-5 space-y-6 flex-1">
-                          {entry.text ? (
-                            <p className="text-base leading-relaxed text-foreground italic">
-                              „{entry.text}“
-                            </p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground italic">Keine Notiz vorhanden</p>
-                          )}
+            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-muted)' }}>
+              {model?.entries?.length ?? 0} Einträge verteilt auf 3 Layer
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: 14 }}>
+            {layers.map((layer, index) => (
+              <motion.div
+                key={layer.title}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: index * 0.08, ease: 'power3.out' }}
+                style={{
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  boxShadow: '0 24px 60px rgba(15, 23, 42, 0.08)',
+                  border: '1px solid rgba(15,23,42,0.06)',
+                }}
+              >
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '16px 18px', background: layer.background,
+                }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, letterSpacing: '0.18em', color: layer.accent }}>
+                      {layer.title}
+                    </div>
+                    <div style={{ fontFamily: 'var(--f-display)', fontSize: 18, fontWeight: 800, color: layer.text }}>
+                      {layer.itemCount} Einträge
+                    </div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)' }}>
+                    {layer.title === 'Layer 01' ? 'Meta + Einträge' : 'Nur Einträge'}
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(15,23,42,0.96)', padding: '14px 16px', overflowX: 'auto' }}>
+                  <pre style={{
+                    margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    fontSize: 11, lineHeight: 1.45, color: '#E5E7EB',
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                  }}>
+                    {prettifyJson(layer.payload)}
+                  </pre>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
 
-                          {(entry.images?.length > 0 || entry.audio) && (
-                            <div className="space-y-5 pt-2">
-                              {entry.images?.length > 0 && (
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                                    <ImageIcon className="w-3.5 h-3.5" /> FOTOS
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    {entry.images.map((img) => {
-                                      const media = mediaData?.[img.id];
-                                      return media ? (
-                                        <img
-                                          key={img.id}
-                                          src={media.dataUrl}
-                                          alt="Hochgeladenes Foto"
-                                          className="w-full aspect-square object-cover rounded-xl border border-border shadow-xs"
-                                        />
-                                      ) : null;
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-
-                              {entry.audio && selectedAudio && (
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                                    <Mic className="w-3.5 h-3.5" /> SPRACHMEMO
-                                  </div>
-                                  <div className="p-2 rounded-xl bg-muted border flex items-center gap-3">
-                                    <audio controls src={selectedAudio.dataUrl} className="flex-1 h-9" />
-                                    <span className="text-[10px] font-mono text-muted-foreground shrink-0 pr-2">
-                                      {entry.audio.duration}s
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
+        {entries.length > 0 && (
+          <div style={{ marginBottom: 18, animation: 'fadeUp 0.5s var(--ease) both' }}>
+            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)', marginBottom: 10 }}>
+              EINTRÄGE NACH TAG — Wähle einen Tag, um die Details zu sehen
+            </div>
+            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+              {entries.map((entry, i) => (
+                <button
+                  key={entry.date}
+                  type="button"
+                  onClick={() => setSelectedIndex(i)}
+                  style={{
+                    flex: '0 0 auto', minWidth: 110, padding: '12px 14px', border: '1px solid',
+                    borderColor: i === selectedIndex ? 'var(--blue)' : 'rgba(148,163,184,0.35)',
+                    borderRadius: 16,
+                    background: i === selectedIndex ? 'rgba(59,138,255,0.08)' : 'rgba(255,255,255,0.92)',
+                    color: i === selectedIndex ? 'var(--tx-primary)' : 'var(--tx-secondary)',
+                    textAlign: 'left', cursor: 'pointer', boxShadow: i === selectedIndex ? '0 12px 24px rgba(59,138,255,0.12)' : 'none',
+                  }}
+                >
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+                    Tag {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div style={{ marginTop: 6, fontFamily: 'var(--f-mono)', fontSize: 12, fontWeight: 700 }}>
+                    {formatDate(entry.date)}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Technical Details Accordion */}
-        <div className="px-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-          <Accordion type="single" collapsible className="w-full bg-card border rounded-2xl px-4 shadow-xs">
-            <AccordionItem value="layers" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-5">
-                <div className="flex items-center gap-3 text-left">
-                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
-                    <Database className="w-4 h-4" />
+        {selectedEntry && (
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--bd-default)',
+            borderRadius: 14,
+            overflow: 'hidden',
+            marginBottom: 16,
+            animation: 'fadeUp 0.5s var(--ease) both',
+          }}>
+            {/* Date + mood */}
+            <div style={{
+              padding: '14px 16px',
+              background: 'var(--bg-surface)',
+              borderBottom: '1px solid var(--bd-subtle)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-secondary)' }}>
+                {formatDate(selectedEntry.date)}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>{MOOD_ICONS[selectedEntry.mood] || '•'}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 14, fontWeight: 700 }}>
+                    {selectedEntry.mood != null ? `${selectedEntry.mood}/5` : 'Keine Bewertung'}
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold">Technische Details & Layer</span>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      Multiplex QR-Code Daten ansehen
-                    </span>
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 9, color: 'var(--tx-muted)' }}>
+                    {selectedEntry.mood != null ? MOOD_LABELS[selectedEntry.mood] : 'Keine Stimmung angegeben'}
                   </div>
                 </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2 pb-5">
-                {layers.map((layer) => (
-                  <div 
-                    key={layer.title} 
-                    className="rounded-xl overflow-hidden border border-border shadow-xs"
-                  >
-                    <div 
-                      className="flex items-center justify-between p-4" 
-                      style={{ background: layer.background }}
-                    >
-                      <div>
-                        <div className="font-mono text-[10px] tracking-widest" style={{ color: layer.accent }}>
-                          {layer.title}
-                        </div>
-                        <div className="font-bold text-lg" style={{ color: layer.text }}>
-                          {layer.itemCount} Einträge
-                        </div>
-                      </div>
-                      <div className="font-mono text-xs opacity-70" style={{ color: layer.text }}>
-                        {layer.title === 'Layer 01' ? 'Meta + Daten' : 'Nur Daten'}
-                      </div>
-                    </div>
-                    <div className="bg-slate-900 p-4 overflow-x-auto">
-                      <pre className="text-[10px] leading-relaxed text-slate-300 font-mono">
-                        {prettifyJson(layer.payload)}
-                      </pre>
+              </div>
+            </div>
+
+            {/* Text */}
+            {selectedEntry.text && (
+              <div style={{ padding: '14px 16px' }}>
+                <div style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--tx-primary)', fontStyle: 'italic' }}>
+                  „{selectedEntry.text}"
+                </div>
+              </div>
+            )}
+
+            {/* Media + extras */}
+            <div style={{ padding: '0 16px 14px' }}>
+              <div style={{ display: 'grid', gap: 12 }}>
+                {selectedEntry.images?.length > 0 && (
+                  <div>
+                    <div className="label" style={{ marginBottom: 8 }}>FOTOS</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 8 }}>
+                      {selectedEntry.images.map((img) => {
+                        const media = mediaData?.[img.id];
+                        return media ? (
+                          <img
+                            key={img.id}
+                            src={media.dataUrl}
+                            alt="Hochgeladenes Foto"
+                            style={{
+                              width: '100%',
+                              aspectRatio: '1',
+                              objectFit: 'cover',
+                              borderRadius: 8,
+                              border: '1px solid var(--bd-subtle)',
+                              animation: 'fadeUp 0.5s var(--ease) both',
+                            }}
+                          />
+                        ) : null;
+                      })}
                     </div>
                   </div>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                )}
+
+                {selectedEntry.audio && selectedAudio && (
+                  <div>
+                    <div className="label" style={{ marginBottom: 8 }}>SPRACHMEMO</div>
+                    <div style={{
+                      padding: '10px 14px', borderRadius: 10,
+                      background: 'var(--bg-surface)', border: '1px solid var(--bd-default)',
+                      display: 'flex', alignItems: 'center', gap: 12,
+                    }}>
+                      <span style={{ fontSize: 18 }}>🎙</span>
+                      <audio controls src={selectedAudio.dataUrl} style={{ flex: 1, height: 32 }} />
+                      <span style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', flexShrink: 0 }}>
+                        {selectedEntry.audio.duration}s
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, padding: '12px 0 0' }}>
+                  <div style={{ flex: '1 1 150px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--bd-subtle)', padding: 12 }}>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginBottom: 6 }}>BILDER</div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-primary)' }}>
+                      {selectedEntry.images?.length ?? 0}
+                    </div>
+                  </div>
+                  <div style={{ flex: '1 1 150px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--bd-subtle)', padding: 12 }}>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginBottom: 6 }}>AUDIO</div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-primary)' }}>
+                      {selectedEntry.audio ? 'Ja' : 'Nein'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {entries.length > 1 && (
+          <div style={{ animation: 'fadeUp 0.5s var(--ease) 0.2s both' }}>
+            <div className="label" style={{ marginBottom: 12 }}>
+              WEITERE EINTRÄGE
+            </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              {entries.map((entry, i) => (
+                <button
+                  key={entry.date}
+                  type="button"
+                  onClick={() => setSelectedIndex(i)}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '12px 14px',
+                    borderRadius: 14,
+                    border: i === selectedIndex ? '1px solid var(--blue)' : '1px solid var(--bd-subtle)',
+                    background: i === selectedIndex ? 'rgba(59,138,255,0.08)' : 'var(--bg-card)',
+                    color: 'var(--tx-primary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)' }}>
+                        {formatDate(entry.date)}
+                      </div>
+                      <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700 }}>
+                        {entry.text ? entry.text.slice(0, 40) : 'Keine Notiz vorhanden'}
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-muted)' }}>
+                      {entry.mood != null ? `${entry.mood}/5` : '-'}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Info footer */}
+        <div style={{
+          marginTop: 24, padding: '12px 14px', borderRadius: 10,
+          background: 'var(--blue-dim)', border: '1px solid rgba(59,138,255,0.25)',
+          fontSize: 11, lineHeight: 1.6, color: 'var(--tx-secondary)',
+        }}>
+          <span style={{ fontFamily: 'var(--f-mono)', color: 'var(--blue)' }}>Multi-Layer QR Demo</span>
+          {' '}— Diese Daten wurden über einen Farb-multiplex-QR-Code und WebSocket-Verbindung übertragen und hier rekonstruiert.
         </div>
       </div>
     </div>
@@ -304,55 +450,59 @@ export default function MobileView() {
   }, [sessionId]);
 
   const Spinner = () => (
-    <div className="w-10 h-10 rounded-full border-4 border-muted border-t-blue-500 animate-spin mx-auto mb-5" />
+    <div style={{
+      width: 40, height: 40, borderRadius: '50%',
+      border: '3px solid var(--bd-strong)', borderTopColor: 'var(--blue)',
+      animation: 'spin 1s linear infinite', margin: '0 auto 20px',
+    }} />
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div style={{ minHeight: '100vh', background: 'var(--bg-deep)', fontFamily: 'var(--f-body)' }}>
 
       {error && (
-        <div className="p-10 text-center animate-in fade-in zoom-in-95">
-          <div className="text-4xl mb-4">⚠️</div>
-          <div className="font-mono text-sm text-destructive leading-relaxed">{error}</div>
+        <div style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--err)', lineHeight: 1.6 }}>{error}</div>
         </div>
       )}
 
       {!error && phase === 'connecting' && (
-        <div className="pt-24 px-6 text-center animate-in fade-in">
+        <div style={{ padding: '70px 24px', textAlign: 'center' }}>
           <Spinner />
-          <div className="font-mono text-xs text-blue-500 tracking-widest">VERBINDE…</div>
-          <div className="font-mono text-[10px] text-muted-foreground mt-2">Session {sessionId}</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--blue)', letterSpacing: '0.1em' }}>VERBINDE…</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginTop: 8 }}>Session {sessionId}</div>
         </div>
       )}
 
       {!error && phase === 'waiting' && (
-        <div className="pt-24 px-6 text-center animate-in fade-in zoom-in-95">
-          <div className="text-5xl mb-4">📱</div>
-          <div className="font-mono text-xs text-green-500 tracking-widest">✓ VERBUNDEN</div>
-          <div className="text-2xl font-bold mt-3">Session {sessionId}</div>
-          <div className="text-sm text-muted-foreground mt-4 leading-relaxed">
+        <div style={{ padding: '70px 24px', textAlign: 'center' }}>
+          <div style={{ fontSize: 44, marginBottom: 12 }}>📱</div>
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--ok)', letterSpacing: '0.12em' }}>✓ VERBUNDEN</div>
+          <div style={{ fontFamily: 'var(--f-display)', fontSize: 22, fontWeight: 700, marginTop: 8 }}>Session {sessionId}</div>
+          <div style={{ fontSize: 13, color: 'var(--tx-secondary)', marginTop: 12, lineHeight: 1.6 }}>
             Warte auf Daten vom Desktop…
           </div>
         </div>
       )}
 
       {!error && phase === 'receiving' && (
-        <div className="pt-24 px-6 text-center animate-in fade-in">
+        <div style={{ padding: '70px 24px', textAlign: 'center' }}>
           <Spinner />
-          <div className="font-mono text-xs text-blue-500 tracking-widest mb-4">
+          <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--blue)', letterSpacing: '0.1em' }}>
             EMPFANGE DATEN…
           </div>
           {progress.total > 0 && (
-            <div className="max-w-80 mx-auto">
-              <div className="font-mono text-[10px] text-muted-foreground mb-2 flex justify-between">
-                <span>Lade Segmente</span>
-                <span>{progress.received} / {progress.total}</span>
+            <div style={{ maxWidth: 240, margin: '16px auto 0' }}>
+              <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginBottom: 6 }}>
+                {progress.received} / {progress.total} Segmente
               </div>
-              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-blue-500 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${Math.round((progress.received / progress.total) * 100)}%` }}
-                />
+              <div style={{ height: 3, background: 'var(--bd-default)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 2, background: 'var(--blue)',
+                  width: `${Math.round(progress.received / progress.total * 100)}%`,
+                  transition: 'width 0.3s',
+                }} />
               </div>
             </div>
           )}
