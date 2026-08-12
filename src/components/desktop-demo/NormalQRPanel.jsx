@@ -1,10 +1,13 @@
 import { TriangleAlert, LockKeyhole } from 'lucide-react';
-import { QR_CAPACITY_BY_LEVEL } from '../../lib/data';
+import { QR_CAPACITY_BY_LEVEL, formatSize, getCapacityInfo } from '../../lib/data';
+
+const LEVEL_COLOR = { ok: 'var(--tx-primary)', warn: 'var(--warn)', err: 'var(--err)' };
 
 export default function NormalQRPanel({ qrState, dataSize }) {
   // Darken on either signal: the real encoder failing, or the visible data-size
   // estimate (which also counts referenced photo/audio bytes) crossing the M-level cap.
   const exceeded = qrState.error === 'CAPACITY_EXCEEDED' || dataSize > QR_CAPACITY_BY_LEVEL.M;
+  const capacity = getCapacityInfo(dataSize, QR_CAPACITY_BY_LEVEL.L);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-100 flex-col rounded-3xl bg-white px-9 py-9 shadow-[0_20px_60px_rgba(255,87,87,0.08)]">
@@ -47,7 +50,9 @@ export default function NormalQRPanel({ qrState, dataSize }) {
       <div className="flex flex-col divide-y divide-(--bd-subtle) border-y border-(--bd-subtle)">
         <div className="flex items-center justify-between py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Datenkapazität</span>
-          <span className="font-bold">Max. {QR_CAPACITY_BY_LEVEL.L.toLocaleString('de-DE')} Bytes</span>
+          <span className="font-bold" style={{ color: LEVEL_COLOR[capacity.level] }}>
+            {formatSize(dataSize)} / {formatSize(QR_CAPACITY_BY_LEVEL.L)}
+          </span>
         </div>
         <div className="flex items-center justify-between py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Farbkanäle</span>

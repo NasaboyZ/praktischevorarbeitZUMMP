@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react';
+import { Mic, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { getBestAudioMime } from '../../lib/media';
 
 export default function AudioRecorder({ audio, onAudio }) {
@@ -38,31 +40,43 @@ export default function AudioRecorder({ audio, onAudio }) {
     setRecording(false);
   };
 
+  if (audio && !recording) {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-(--bd-subtle) bg-(--bg-surface) px-4 py-3">
+        <audio controls src={audio.dataUrl} className="h-8 flex-1" />
+        <span className="font-mono text-[11px] text-(--tx-muted)">{audio.duration}s</span>
+        <button
+          type="button"
+          onClick={() => onAudio(null)}
+          className="flex size-6 shrink-0 items-center justify-center rounded-full bg-(--err) text-white"
+        >
+          <X className="size-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  if (recording) {
+    return (
+      <Button
+        type="button"
+        onClick={stop}
+        className="h-12 w-full gap-2 rounded-full bg-(--err) text-base font-bold text-white hover:bg-(--err)/85"
+      >
+        <span className="size-2 animate-pulse rounded-full bg-white" />
+        {elapsed}s — Aufnahme stoppen
+      </Button>
+    );
+  }
+
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-      {!recording && !audio && (
-        <button className="btn btn-ghost" onClick={start} style={{ fontSize:11 }}>
-          <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3zm-1 13.93V18H9v2h6v-2h-2v-2.07A7 7 0 0019 9h-2a5 5 0 01-10 0H5a7 7 0 006 6.93z"/>
-          </svg>
-          Aufnehmen
-        </button>
-      )}
-      {recording && (
-        <button className="btn btn-danger" onClick={stop}>
-          <span style={{ width:8,height:8, background:'var(--err)', borderRadius:2, display:'inline-block', animation:'blink 1s infinite' }} />
-          {elapsed}s — Stop
-        </button>
-      )}
-      {audio && !recording && (
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <audio controls src={audio.dataUrl} style={{ height:28, maxWidth:160 }} />
-          <span style={{ fontFamily:'var(--f-mono)', fontSize:10, color:'var(--tx-muted)' }}>
-            {audio.duration}s
-          </span>
-          <button onClick={() => onAudio(null)} className="btn btn-danger" style={{ padding:'2px 8px' }}>×</button>
-        </div>
-      )}
-    </div>
+    <Button
+      type="button"
+      onClick={start}
+      className="h-12 w-full gap-2 rounded-full bg-(--tx-primary) text-base font-bold text-white hover:bg-(--tx-primary)/85"
+    >
+      <Mic className="size-4" />
+      Aufnahme starten
+    </Button>
   );
 }

@@ -172,7 +172,19 @@ function CalendarDayButton({
         defaultClassNames.day,
         className
       )}
-      {...props} />
+      {...props}
+    >
+      {props.children}
+      {modifiers.hasEntry && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-full",
+            modifiers.selected ? "bg-white" : "bg-(--violet)"
+          )}
+        />
+      )}
+    </Button>
   );
 }
 

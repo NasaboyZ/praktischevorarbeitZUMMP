@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   buildDataModel, buildPayload, splitDataForLayers,
-  calculateDataSize, getTimelineDays, generateSessionId,
+  calculateDataSize, generateSessionId,
 } from '../lib/data';
 import { generateColorQR, tryGenerateNormalQR, generateSessionQR } from '../lib/qr';
 import { connectDesktop, sendPayload, getMobileBaseUrl } from '../lib/ws';
@@ -9,18 +9,12 @@ import ControlCenter from './desktop-demo/ControlCenter';
 import NormalQRPanel from './desktop-demo/NormalQRPanel';
 import MultiLayerQRPanel from './desktop-demo/MultiLayerQRPanel';
 
-
-const INITIAL_USER_DATA = () => ({
-  name: '', moods: [], location: [], text: '', images: [], audio: null,
-  date: new Date().toISOString().split('T')[0],
-});
-
 export default function DesktopDemo() {
-  
+
   // ─ State ─
   const [sessionId]    = useState(generateSessionId);
-  const [userData, setUserData] = useState(INITIAL_USER_DATA);
-  const [timeline,    setTimeline]    = useState(0);
+  const [name,     setName]     = useState('');
+  const [entries,  setEntries]  = useState([]);
   const [normalQR,    setNormalQR]    = useState({ dataUrl: null, error: null, size: 0 });
   const [colorQR,     setColorQR]     = useState(null);
   const [sessionQR,   setSessionQR]   = useState(null);
@@ -28,13 +22,12 @@ export default function DesktopDemo() {
   const connRef    = useRef(null);
   const genTimer   = useRef(null);
   // Refs to avoid stale closure when mobile joins
-  const userDataRef     = useRef(userData);
-  const timelineDaysRef = useRef(1);
-  useEffect(() => { userDataRef.current = userData; }, [userData]);
+  const entriesRef = useRef(entries);
+  const nameRef     = useRef(name);
+  useEffect(() => { entriesRef.current = entries; }, [entries]);
+  useEffect(() => { nameRef.current = name; }, [name]);
 
-  const timelineDays = getTimelineDays(timeline);
-  const dataSize     = calculateDataSize(userData, timelineDays);
-  useEffect(() => { timelineDaysRef.current = timelineDays; }, [timelineDays]);
+  const dataSize = calculateDataSize(entries, { sessionId, name });
 
   const mobileUrl = `${getMobileBaseUrl()}/?mobile=1&s=${sessionId}`;
 
@@ -50,10 +43,7 @@ export default function DesktopDemo() {
       onMobileConnected: () => {
         setWsConnected(true);
         // Send current data immediately when phone connects
-        const payload = buildPayload(
-          { ...userDataRef.current, sessionId },
-          timelineDaysRef.current
-        );
+        const payload = buildPayload(entriesRef.current, { sessionId, name: nameRef.current });
         sendPayload(conn, payload);
       },
       onError: () => {},
@@ -62,11 +52,11 @@ export default function DesktopDemo() {
     return () => conn.close();
   }, [sessionId]); // eslint-disable-line
 
-  // ─ Regenerate QR codes on data/timeline change (debounced) ─
+  // ─ Regenerate QR codes on data change (debounced) ─
   useEffect(() => {
     clearTimeout(genTimer.current);
     genTimer.current = setTimeout(async () => {
-      const model   = buildDataModel({ ...userData, sessionId }, timelineDays);
+      const model   = buildDataModel(entries, { sessionId, name });
       const jsonStr = JSON.stringify(model);
       const nqr     = await tryGenerateNormalQR(jsonStr);
       setNormalQR(nqr);
@@ -75,7 +65,7 @@ export default function DesktopDemo() {
       setColorQR(cqr);
     }, 600);
     return () => clearTimeout(genTimer.current);
-  }, [userData, timeline, sessionId, timelineDays]);
+  }, [entries, sessionId, name]);
 
   return (
     <main
@@ -92,12 +82,11 @@ export default function DesktopDemo() {
       {/* ── CENTER: Control Center ── */}
       <div className="overflow-y-auto">
         <ControlCenter
-          userData={userData}
-          setUserData={setUserData}
-          timeline={timeline}
-          setTimeline={setTimeline}
+          entries={entries}
+          setEntries={setEntries}
+          name={name}
+          setName={setName}
           dataSize={dataSize}
-          timelineDays={timelineDays}
         />
       </div>
 
@@ -108,6 +97,7 @@ export default function DesktopDemo() {
           sessionQR={sessionQR}
           sessionId={sessionId}
           wsConnected={wsConnected}
+          dataSize={dataSize}
         />
       </div>
     </main>

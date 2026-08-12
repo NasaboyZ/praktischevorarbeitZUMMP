@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { formatSize, QR_CAPACITY_BY_LEVEL } from '../../lib/data';
+import { formatSize, QR_CAPACITY_BY_LEVEL, getCapacityInfo } from '../../lib/data';
 
-export default function MultiLayerQRPanel({ colorQR, sessionQR, sessionId, wsConnected }) {
+const LEVEL_COLOR = { ok: 'var(--violet)', warn: 'var(--warn)', err: 'var(--err)' };
+const MLQR_CAPACITY = QR_CAPACITY_BY_LEVEL.L * 3;
+
+export default function MultiLayerQRPanel({ colorQR, sessionQR, sessionId, wsConnected, dataSize = 0 }) {
   const [showScanQR, setShowScanQR] = useState(false);
+  const capacity = getCapacityInfo(dataSize, MLQR_CAPACITY);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-100 flex-col rounded-3xl bg-white px-9 py-9 shadow-[0_20px_60px_rgba(109,91,208,0.10)]">
@@ -49,7 +53,9 @@ export default function MultiLayerQRPanel({ colorQR, sessionQR, sessionId, wsCon
       <div className="flex flex-col divide-y divide-(--bd-subtle) border-y border-(--bd-subtle)">
         <div className="flex items-center justify-between py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Datenkapazität</span>
-          <span className="font-bold text-(--violet)">Bis zu {formatSize(QR_CAPACITY_BY_LEVEL.L * 3)}</span>
+          <span className="font-bold" style={{ color: LEVEL_COLOR[capacity.level] }}>
+            {formatSize(dataSize)} / {formatSize(MLQR_CAPACITY)}
+          </span>
         </div>
         <div className="flex items-center justify-between py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Ebenenaufteilung</span>

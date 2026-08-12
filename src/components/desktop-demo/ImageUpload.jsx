@@ -1,3 +1,4 @@
+import { Image as ImageIcon, X } from 'lucide-react';
 import { resizeImage } from '../../lib/media';
 
 export default function ImageUpload({ images, onChange }) {
@@ -23,39 +24,25 @@ export default function ImageUpload({ images, onChange }) {
 
   return (
     <div>
-      <label
-        style={{
-          display:'flex', alignItems:'center', gap:8, cursor:'pointer',
-          padding:'7px 10px', borderRadius:8,
-          border:'1px dashed var(--bd-strong)', color:'var(--tx-secondary)',
-          fontSize:12, fontFamily:'var(--f-mono)', transition:'all 0.15s',
-        }}
-        onMouseOver={(e) => e.currentTarget.style.borderColor='var(--blue)'}
-        onMouseOut={(e) => e.currentTarget.style.borderColor='var(--bd-strong)'}
-      >
-        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-        </svg>
-        {images.length ? `${images.length} Foto${images.length>1?'s':''} geladen` : 'Fotos hochladen'}
-        <input type="file" accept="image/*" multiple onChange={handleFiles} style={{display:'none'}} />
+      <label className="flex h-32 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-(--bd-strong) bg-(--bg-surface) text-(--tx-muted) transition-colors hover:border-(--violet) hover:text-(--violet)">
+        <ImageIcon className="size-6" strokeWidth={1.5} />
+        <span className="text-sm font-medium">
+          {images.length ? `${images.length} Foto${images.length > 1 ? 's' : ''} geladen` : 'Bilder hinzufügen'}
+        </span>
+        <input type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" />
       </label>
       {images.length > 0 && (
-        <div style={{ display:'flex', gap:6, marginTop:8, flexWrap:'wrap' }}>
+        <div className="mt-3 flex flex-wrap gap-2">
           {images.map((img) => (
-            <div key={img.id} style={{ position:'relative' }}>
-              <img src={img.dataUrl} alt="" style={{
-                width:44, height:44, objectFit:'cover', borderRadius:6,
-                border:'1px solid var(--bd-strong)',
-              }} />
+            <div key={img.id} className="relative">
+              <img src={img.dataUrl} alt="" className="size-11 rounded-md border border-(--bd-strong) object-cover" />
               <button
+                type="button"
                 onClick={() => onChange((p) => p.filter((x) => x.id !== img.id))}
-                style={{
-                  position:'absolute', top:-5, right:-5,
-                  background:'var(--err)', border:'none', color:'#fff',
-                  borderRadius:'50%', width:16, height:16,
-                  fontSize:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center',
-                }}
-              >×</button>
+                className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full bg-(--err) text-white"
+              >
+                <X className="size-2.5" />
+              </button>
             </div>
           ))}
         </div>
