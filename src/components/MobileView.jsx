@@ -1,13 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { connectMobile } from '../lib/ws';
-
-// shadcn UI & Icons
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Image as ImageIcon, Mic, Database } from "lucide-react";
+import { Calendar, Image as ImageIcon, Mic, Database, ChevronDown } from "lucide-react";
 
 const MOOD_ICONS = ['', '😞', '😕', '😐', '😊', '😄'];
 
@@ -69,7 +63,7 @@ function Reconstructing({ onDone }) {
       <div className="font-mono text-[13px] text-blue-500 tracking-widest mb-8">
         REKONSTRUKTION STARTET
       </div>
-      <div className="flex flex-col gap-3 w-full max-w-[320px]">
+      <div className="flex flex-col gap-3 w-full max-w-80">
         {steps.map((s, i) => (
           <motion.div
             key={s}
@@ -116,6 +110,7 @@ function MemoryCard({ payload }) {
   const entries = model?.entries ?? [];
   const author = model?.author || 'Anonym';
   const layers = useMemo(() => buildLayerPayloads(model), [model]);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background pb-12 overflow-x-hidden">
@@ -132,7 +127,7 @@ function MemoryCard({ payload }) {
 
       <div className="max-w-md mx-auto mt-6 space-y-8">
         
-        {/* Entries Carousel */}
+        {/* Entries CSS Carousel */}
         {entries.length > 0 && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="px-5 mb-3 flex items-center justify-between">
@@ -142,106 +137,110 @@ function MemoryCard({ payload }) {
               <span className="text-xs text-muted-foreground">{entries.length} Tage</span>
             </div>
             
-            <Carousel opts={{ align: "center", dragFree: true }} className="w-full">
-              <CarouselContent className="-ml-4">
-                {entries.map((entry) => {
-                  const selectedAudio = entry.audio ? mediaData?.[entry.audio.id] : null;
-                  
-                  return (
-                    <CarouselItem key={entry.date} className="pl-4 basis-[90%] sm:basis-[85%]">
-                      <Card className="h-full border-border/50 shadow-md bg-card/50 backdrop-blur-sm flex flex-col">
-                        <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Calendar className="w-4 h-4" />
-                              <span className="text-sm font-medium">{formatDate(entry.date)}</span>
-                            </div>
-                            <Badge variant="secondary" className="flex gap-1.5 items-center font-mono">
-                              <span className="text-base">{MOOD_ICONS[entry.mood] || '•'}</span>
-                              <span>{entry.mood != null ? `${entry.mood}/5` : '-'}</span>
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        
-                        <CardContent className="pt-5 space-y-6 flex-1">
-                          {entry.text ? (
-                            <p className="text-base leading-relaxed text-foreground italic">
-                              „{entry.text}“
-                            </p>
-                          ) : (
-                            <p className="text-sm text-muted-foreground italic">Keine Notiz vorhanden</p>
-                          )}
+            {/* Scroll-Snap Carousel Container */}
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-5 pb-4 scrollbar-none scroll-smooth">
+              {entries.map((entry) => {
+                const selectedAudio = entry.audio ? mediaData?.[entry.audio.id] : null;
+                
+                return (
+                  <div 
+                    key={entry.date} 
+                    className="snap-center shrink-0 w-[85%] sm:w-[320px] rounded-2xl border border-border/50 shadow-md bg-card/50 backdrop-blur-xs flex flex-col overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-border/50 bg-muted/20 flex justify-between items-center">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-sm font-medium">{formatDate(entry.date)}</span>
+                      </div>
+                      <div className="px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-mono flex gap-1.5 items-center">
+                        <span className="text-base">{MOOD_ICONS[entry.mood] || '•'}</span>
+                        <span>{entry.mood != null ? `${entry.mood}/5` : '-'}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-5 space-y-6 flex-1">
+                      {entry.text ? (
+                        <p className="text-base leading-relaxed text-foreground italic">
+                          „{entry.text}“
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">Keine Notiz vorhanden</p>
+                      )}
 
-                          {(entry.images?.length > 0 || entry.audio) && (
-                            <div className="space-y-5 pt-2">
-                              {entry.images?.length > 0 && (
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                                    <ImageIcon className="w-3.5 h-3.5" /> FOTOS
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    {entry.images.map((img) => {
-                                      const media = mediaData?.[img.id];
-                                      return media ? (
-                                        <img
-                                          key={img.id}
-                                          src={media.dataUrl}
-                                          alt="Hochgeladenes Foto"
-                                          className="w-full aspect-square object-cover rounded-xl border border-border shadow-xs"
-                                        />
-                                      ) : null;
-                                    })}
-                                  </div>
-                                </div>
-                              )}
-
-                              {entry.audio && selectedAudio && (
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                                    <Mic className="w-3.5 h-3.5" /> SPRACHMEMO
-                                  </div>
-                                  <div className="p-2 rounded-xl bg-muted border flex items-center gap-3">
-                                    <audio controls src={selectedAudio.dataUrl} className="flex-1 h-9" />
-                                    <span className="text-[10px] font-mono text-muted-foreground shrink-0 pr-2">
-                                      {entry.audio.duration}s
-                                    </span>
-                                  </div>
-                                </div>
-                              )}
+                      {(entry.images?.length > 0 || entry.audio) && (
+                        <div className="space-y-5 pt-2">
+                          {entry.images?.length > 0 && (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                                <ImageIcon className="w-3.5 h-3.5" /> FOTOS
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                {entry.images.map((img) => {
+                                  const media = mediaData?.[img.id];
+                                  return media ? (
+                                    <img
+                                      key={img.id}
+                                      src={media.dataUrl}
+                                      alt="Hochgeladenes Foto"
+                                      className="w-full aspect-square object-cover rounded-xl border border-border shadow-xs"
+                                    />
+                                  ) : null;
+                                })}
+                              </div>
                             </div>
                           )}
-                        </CardContent>
-                      </Card>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
+
+                          {entry.audio && selectedAudio && (
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                                <Mic className="w-3.5 h-3.5" /> SPRACHMEMO
+                              </div>
+                              <div className="p-2 rounded-xl bg-muted border flex items-center gap-3">
+                                <audio controls src={selectedAudio.dataUrl} className="flex-1 h-9" />
+                                <span className="text-[10px] font-mono text-muted-foreground shrink-0 pr-2">
+                                  {entry.audio.duration}s
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {/* Technical Details Accordion */}
         <div className="px-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-          <Accordion type="single" collapsible className="w-full bg-card border rounded-2xl px-4 shadow-xs">
-            <AccordionItem value="layers" className="border-none">
-              <AccordionTrigger className="hover:no-underline py-5">
-                <div className="flex items-center gap-3 text-left">
-                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
-                    <Database className="w-4 h-4" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold">Technische Details & Layer</span>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      Multiplex QR-Code Daten ansehen
-                    </span>
-                  </div>
+          <div className="w-full bg-card border rounded-2xl px-4 shadow-xs overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+              className="w-full py-5 flex items-center justify-between text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                  <Database className="w-4 h-4" />
                 </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2 pb-5">
+                <div className="flex flex-col">
+                  <span className="text-sm font-semibold">Technische Details & Layer</span>
+                  <span className="text-xs text-muted-foreground">
+                    Multiplex QR-Code Daten ansehen
+                  </span>
+                </div>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAccordionOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isAccordionOpen && (
+              <div className="space-y-4 pt-2 pb-5 border-t border-border/50">
                 {layers.map((layer) => (
                   <div 
                     key={layer.title} 
-                    className="rounded-xl overflow-hidden border border-border shadow-xs"
+                    className="rounded-xl overflow-hidden border border-border shadow-xs mt-3"
                   >
                     <div 
                       className="flex items-center justify-between p-4" 
@@ -266,9 +265,9 @@ function MemoryCard({ payload }) {
                     </div>
                   </div>
                 ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -343,7 +342,7 @@ export default function MobileView() {
             EMPFANGE DATEN…
           </div>
           {progress.total > 0 && (
-            <div className="max-w-80 mx-auto">
+            <div className="max-w-60 mx-auto">
               <div className="font-mono text-[10px] text-muted-foreground mb-2 flex justify-between">
                 <span>Lade Segmente</span>
                 <span>{progress.received} / {progress.total}</span>
