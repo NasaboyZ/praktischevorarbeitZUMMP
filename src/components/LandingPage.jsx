@@ -2,11 +2,7 @@ import Hero from './landing/Hero';
 import PrincipleSection from './landing/PrincipleSection';
 import ConceptSection from './landing/ConceptSection';
 import AboutSection from './landing/AboutSection';
-import StepsSection from './landing/StepsSection';
-import BenefitsSection from './landing/BenefitsSection';
-import StatsSection from './landing/StatsSection';
-import PreviewSection from './landing/PreviewSection';
-import FinalCta from './landing/FinalCta';
+import HighlightsSection from './landing/HighlightsSection';
 import Footer from './landing/Footer';
 
 export default function LandingPage({ onStart }) {
@@ -16,11 +12,7 @@ export default function LandingPage({ onStart }) {
       <PrincipleSection onStart={onStart} />
       <ConceptSection />
       <AboutSection />
-      <StepsSection />
-      <BenefitsSection />
-      <StatsSection />
-      <PreviewSection />
-      <FinalCta onStart={onStart} />
+      <HighlightsSection />
       <Footer />
     </div>
   );

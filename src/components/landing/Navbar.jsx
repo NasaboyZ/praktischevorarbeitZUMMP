@@ -6,10 +6,9 @@ import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { motion, AnimatePresence } from 'motion/react';
 
 const SECTIONS = [
+  { id: 'prinzip', label: 'Das Prinzip' },
   { id: 'konzept', label: 'Das Konzept' },
-  { id: 'ablauf',  label: 'Ablauf in 4 Schritten' },
-  { id: 'warum',   label: 'Warum Mental Health' },
-  { id: 'vorschau', label: 'Vorschau' },
+  { id: 'projekt', label: 'Über das Projekt' },
 ];
 
 export default function Navbar({ onStart }) {
