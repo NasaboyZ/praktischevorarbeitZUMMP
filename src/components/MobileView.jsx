@@ -40,24 +40,19 @@ function buildLayerPayloads(model) {
 function Reconstructing({ onDone }) {
   const [step, setStep] = useState(0);
   const steps = ['Layer 1 entschlüsseln', 'Layer 2 entschlüsseln', 'Layer 3 entschlüsseln', 'Medien wiederherstellen', 'Fertig'];
-  const stageRef = useRef(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from('.reconstruct-step', { opacity: 0, y: 20, stagger: 0.08, duration: 0.45, ease: 'power3.out' });
-    }, stageRef);
-
     let i = 0;
     const t = setInterval(() => {
       i++;
       setStep(i);
       if (i >= steps.length) { clearInterval(t); setTimeout(onDone, 500); }
     }, 700);
-    return () => { clearInterval(t); ctx.revert(); };
+    return () => clearInterval(t);
   }, [onDone, steps.length]);
 
   return (
-    <div ref={stageRef} style={{ padding: '40px 24px', textAlign: 'center' }}>
+    <div style={{ padding: '40px 24px', textAlign: 'center' }}>
       <div style={{
         fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--blue)',
         letterSpacing: '0.1em', marginBottom: 24,
@@ -128,6 +123,34 @@ function MemoryCard({ payload }) {
       </div>
 
       <div style={{ padding: '20px 16px', maxWidth: 480, margin: '0 auto' }}>
+        <div style={{
+          padding: '16px 18px',
+          marginBottom: 20,
+          borderRadius: 20,
+          background: 'linear-gradient(135deg, rgba(59,138,255,0.12) 0%, rgba(249,168,212,0.12) 100%)',
+          border: '1px solid rgba(59,138,255,0.16)',
+        }}>
+          <div style={{ fontSize: 11, fontFamily: 'var(--f-mono)', color: 'var(--tx-secondary)', marginBottom: 6 }}>
+            ZUSAMMENGEFÜHRTE LAYER
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {layers.map((layer) => (
+              <span key={layer.title} style={{
+                padding: '8px 12px', borderRadius: 999,
+                background: 'rgba(255,255,255,0.92)',
+                color: layer.text,
+                fontWeight: 700,
+                fontSize: 12,
+                boxShadow: '0 8px 22px rgba(15,23,42,0.08)',
+              }}>
+                {layer.title}
+              </span>
+            ))}
+          </div>
+          <div style={{ marginTop: 12, fontSize: 12, color: 'var(--tx-muted)' }}>
+            Die mobile Ansicht zeigt dir jetzt alle drei Layer payloads und ihre zusammengeführten Einträge.
+          </div>
+        </div>
         {/* Layer distribution */}
         <div style={{ marginBottom: 22, animation: 'fadeUp 0.45s var(--ease) both' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
