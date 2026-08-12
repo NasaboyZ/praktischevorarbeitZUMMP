@@ -21,8 +21,6 @@ const MOOD_OPTIONS = [
   { key: 'verzweifelt', label: 'Verzweifelt', icon: '😟' },
   { key: 'genervt',     label: 'Genervt',     icon: '😒' },
 ];
-const MOOD_ICON_BY_KEY = Object.fromEntries(MOOD_OPTIONS.map((m) => [m.key, m.icon]));
-
 const LOCATION_OPTIONS = [
   { key: 'zuhause', label: 'Zuhause', icon: '🏠' },
   { key: 'familie', label: 'Familie', icon: '👨‍👩‍👧' },
@@ -37,13 +35,23 @@ const LAYER_META = [
   { label: 'Ebene 3 · Blau',         color: 'var(--b)' },
 ];
 
-function TagPicker({ options, value, onChange }) {
+function TagPicker({ options, value, onChange, onAddCustom, addPlaceholder = 'Eigener Begriff…' }) {
+  const [adding, setAdding] = useState(false);
+  const [text, setText] = useState('');
+
   const toggle = (key) => {
     onChange(value.includes(key) ? value.filter((k) => k !== key) : [...value, key]);
   };
 
+  const submitCustom = () => {
+    const trimmed = text.trim();
+    if (trimmed) onAddCustom(trimmed);
+    setText('');
+    setAdding(false);
+  };
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {options.map(({ key, label, icon }) => (
         <Button
           key={key}
@@ -57,13 +65,31 @@ function TagPicker({ options, value, onChange }) {
           {label}
         </Button>
       ))}
-      <Button
-        type="button"
-        variant="pill"
-        className="h-auto gap-1.5 border-dashed px-4 py-2 text-sm font-medium text-(--tx-muted)"
-      >
-        + Hinzufügen
-      </Button>
+      {adding ? (
+        <input
+          type="text"
+          autoFocus
+          value={text}
+          placeholder={addPlaceholder}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') { e.preventDefault(); submitCustom(); }
+            if (e.key === 'Escape') { setText(''); setAdding(false); }
+          }}
+          onBlur={submitCustom}
+          style={{ width: 160 }}
+          className="py-2! text-sm!"
+        />
+      ) : (
+        <Button
+          type="button"
+          variant="pill"
+          onClick={() => setAdding(true)}
+          className="h-auto gap-1.5 border-dashed px-4 py-2 text-sm font-medium text-(--tx-muted)"
+        >
+          + Hinzufügen
+        </Button>
+      )}
     </div>
   );
 }
@@ -76,10 +102,26 @@ function latestDate(entries, fallback) {
   return entries.length ? entries.reduce((max, e) => (e.date > max ? e.date : max), entries[0].date) : fallback;
 }
 
-export default function ControlCenter({ entries, setEntries, name, setName, dataSize }) {
+export default function ControlCenter({ entries, setEntries, name, setName, dataSize, onGenerate }) {
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState(() => createEmptyEntry(localDateToIso(new Date())));
   const [justGenerated, setJustGenerated] = useState(false);
+  const [customMoods, setCustomMoods] = useState([]);
+  const [customLocations, setCustomLocations] = useState([]);
+
+  const moodOptions = [...MOOD_OPTIONS, ...customMoods];
+  const locationOptions = [...LOCATION_OPTIONS, ...customLocations];
+  const moodIconByKey = Object.fromEntries(moodOptions.map((m) => [m.key, m.icon]));
+
+  const addCustomMood = (text) => {
+    setCustomMoods((prev) => (prev.some((m) => m.key === text) ? prev : [...prev, { key: text, label: text, icon: '✨' }]));
+    setDraft((p) => (p.moods.includes(text) ? p : { ...p, moods: [...p.moods, text] }));
+  };
+
+  const addCustomLocation = (text) => {
+    setCustomLocations((prev) => (prev.some((l) => l.key === text) ? prev : [...prev, { key: text, label: text, icon: '📍' }]));
+    setDraft((p) => (p.location.includes(text) ? p : { ...p, location: [...p.location, text] }));
+  };
 
   const handleDateSelect = (d) => {
     if (!d) return;
@@ -114,6 +156,7 @@ export default function ControlCenter({ entries, setEntries, name, setName, data
 
   const handleGenerateClick = () => {
     setJustGenerated(true);
+    onGenerate?.();
     setTimeout(() => setJustGenerated(false), 2000);
   };
 
@@ -160,9 +203,11 @@ export default function ControlCenter({ entries, setEntries, name, setName, data
             <div className="mb-1 text-base font-bold">Wie fühlst du dich gerade?</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Mehrfachauswahl möglich</p>
             <TagPicker
-              options={MOOD_OPTIONS}
+              options={moodOptions}
               value={draft.moods}
               onChange={(moods) => setDraft((p) => ({ ...p, moods }))}
+              onAddCustom={addCustomMood}
+              addPlaceholder="Eigenes Gefühl…"
             />
           </div>
 
@@ -170,9 +215,11 @@ export default function ControlCenter({ entries, setEntries, name, setName, data
             <div className="mb-1 text-base font-bold">Ort</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Wo genau fühlst du dich so?</p>
             <TagPicker
-              options={LOCATION_OPTIONS}
+              options={locationOptions}
               value={draft.location}
               onChange={(location) => setDraft((p) => ({ ...p, location }))}
+              onAddCustom={addCustomLocation}
+              addPlaceholder="Eigener Ort…"
             />
           </div>
 
@@ -285,7 +332,7 @@ export default function ControlCenter({ entries, setEntries, name, setName, data
                 {[...entries].sort((a, b) => b.date.localeCompare(a.date)).map((e) => (
                   <div key={e.date} className="flex items-center gap-2.5 rounded-lg bg-(--bg-surface) px-3 py-2">
                     <span className="font-mono text-[11px] text-(--tx-secondary)">{formatDateLabel(e.date)}</span>
-                    <span className="text-sm">{e.moods.map((m) => MOOD_ICON_BY_KEY[m]).join(' ')}</span>
+                    <span className="text-sm">{e.moods.map((m) => moodIconByKey[m] || '✨').join(' ')}</span>
                     {e.text && (
                       <span className="flex-1 truncate text-xs text-(--tx-muted)">{e.text}</span>
                     )}

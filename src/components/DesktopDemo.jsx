@@ -13,12 +13,15 @@ export default function DesktopDemo() {
 
   // ─ State ─
   const [sessionId]    = useState(generateSessionId);
-  const [name,     setName]     = useState('');
+  const [name,     setName]     = useState(() => {
+    try { return localStorage.getItem('mlqr-name') || ''; } catch { return ''; }
+  });
   const [entries,  setEntries]  = useState([]);
   const [normalQR,    setNormalQR]    = useState({ dataUrl: null, error: null, size: 0 });
   const [colorQR,     setColorQR]     = useState(null);
   const [sessionQR,   setSessionQR]   = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
+  const [showScanQR,  setShowScanQR]  = useState(false);
   const connRef    = useRef(null);
   const genTimer   = useRef(null);
   // Refs to avoid stale closure when mobile joins
@@ -26,6 +29,12 @@ export default function DesktopDemo() {
   const nameRef     = useRef(name);
   useEffect(() => { entriesRef.current = entries; }, [entries]);
   useEffect(() => { nameRef.current = name; }, [name]);
+
+  // Name is the one thing worth remembering across visits — everything else
+  // (session, entries) is meant to start fresh each time.
+  useEffect(() => {
+    try { localStorage.setItem('mlqr-name', name); } catch { /* private mode etc. */ }
+  }, [name]);
 
   const dataSize = calculateDataSize(entries, { sessionId, name });
 
@@ -69,7 +78,7 @@ export default function DesktopDemo() {
 
   return (
     <main
-      className="grid min-h-screen grid-cols-[1fr_1.35fr_1fr] gap-6 p-6"
+      className="grid min-h-screen grid-cols-[1fr_1.35fr_1fr] gap-6 px-6 pt-24 pb-6"
       style={{
         background: 'radial-gradient(ellipse 900px 500px at 0% 0%, rgba(109,91,208,0.07), transparent 60%), radial-gradient(ellipse 900px 500px at 100% 100%, rgba(255,87,87,0.05), transparent 60%), #FAF8FC',
       }}
@@ -87,6 +96,7 @@ export default function DesktopDemo() {
           name={name}
           setName={setName}
           dataSize={dataSize}
+          onGenerate={() => setShowScanQR(true)}
         />
       </div>
 
@@ -98,6 +108,8 @@ export default function DesktopDemo() {
           sessionId={sessionId}
           wsConnected={wsConnected}
           dataSize={dataSize}
+          showScanQR={showScanQR}
+          setShowScanQR={setShowScanQR}
         />
       </div>
     </main>

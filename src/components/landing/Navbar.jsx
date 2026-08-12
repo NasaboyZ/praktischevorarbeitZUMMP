@@ -11,9 +11,10 @@ const SECTIONS = [
   { id: 'projekt', label: 'Über das Projekt' },
 ];
 
-export default function Navbar({ onStart }) {
+export default function Navbar({ onStart, onHome, mode = 'landing' }) {
   const progress = useScrollProgress();
   const [open, setOpen] = useState(false);
+  const inDemo = mode === 'demo';
 
   const goTo = (id) => {
     setOpen(false);
@@ -30,12 +31,14 @@ export default function Navbar({ onStart }) {
         >
           {open ? <X className="size-4" /> : <MenuIcon className="size-4" />}
           <span className="text-[13px] font-semibold">Menü</span>
-          <span className="rounded-full bg-white/15 px-2.5 py-1 font-mono text-[11px] tabular-nums">
-            {progress}%
-          </span>
+          {!inDemo && (
+            <span className="rounded-full bg-white/15 px-2.5 py-1 font-mono text-[11px] tabular-nums">
+              {progress}%
+            </span>
+          )}
         </Button>
 
-  
+
         <AnimatePresence>
           {open && (
             /* 3. motion.div mit initial, animate und exit Zuständen */
@@ -46,7 +49,7 @@ export default function Navbar({ onStart }) {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="absolute origin-top-right right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-(--bd-subtle) bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]"
             >
-              {SECTIONS.map((s) => (
+              {!inDemo && SECTIONS.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => goTo(s.id)}
@@ -55,12 +58,21 @@ export default function Navbar({ onStart }) {
                   {s.label}
                 </button>
               ))}
-              <button
-                onClick={() => { setOpen(false); onStart(); }}
-                className="block w-full border-t border-(--bd-subtle) px-4 py-3 text-left text-sm font-semibold text-(--blue) hover:bg-(--blue-dim)"
-              >
-                Demo starten →
-              </button>
+              {inDemo ? (
+                <button
+                  onClick={() => { setOpen(false); onHome(); }}
+                  className="block w-full px-4 py-3 text-left text-sm font-semibold text-(--blue) hover:bg-(--blue-dim)"
+                >
+                  ← Zur Startseite
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setOpen(false); onStart(); }}
+                  className="block w-full border-t border-(--bd-subtle) px-4 py-3 text-left text-sm font-semibold text-(--blue) hover:bg-(--blue-dim)"
+                >
+                  Demo starten →
+                </button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

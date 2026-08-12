@@ -1,12 +1,13 @@
-import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { formatSize, QR_CAPACITY_BY_LEVEL, getCapacityInfo } from '../../lib/data';
 
 const LEVEL_COLOR = { ok: 'var(--violet)', warn: 'var(--warn)', err: 'var(--err)' };
 const MLQR_CAPACITY = QR_CAPACITY_BY_LEVEL.L * 3;
 
-export default function MultiLayerQRPanel({ colorQR, sessionQR, sessionId, wsConnected, dataSize = 0 }) {
-  const [showScanQR, setShowScanQR] = useState(false);
+export default function MultiLayerQRPanel({
+  colorQR, sessionQR, sessionId, wsConnected, dataSize = 0,
+  showScanQR, setShowScanQR,
+}) {
   const capacity = getCapacityInfo(dataSize, MLQR_CAPACITY);
 
   return (

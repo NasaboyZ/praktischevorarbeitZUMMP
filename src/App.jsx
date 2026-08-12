@@ -11,7 +11,10 @@ export default function App() {
   const [showDemo, setShowDemo] = useState(false);
 
   if (isMobile) return <MobileView />;
-  if (showDemo) return <DesktopDemo />;
+  if (showDemo) return <>
+    <Navbar mode="demo" onHome={() => setShowDemo(false)} />
+    <DesktopDemo />
+  </>
   return <>
     <Navbar onStart={() => setShowDemo(true)} />
     <LandingPage onStart={() => setShowDemo(true)} />
