@@ -42,17 +42,22 @@ function makeLayerCanvas(imageData, ch) {
   return canvas;
 }
 
-// Color-multiplex 3 QR texts → { colorDataUrl, layerDataUrls[3] }
+// Color-multiplex 3 QR texts → { colorDataUrl, layerDataUrls[3], error }
 export async function generateColorQR(text1, text2, text3) {
   const t1 = text1 || 'layer1';
   const t2 = text2 || 'layer2';
   const t3 = text3 || 'layer3';
 
-  const [r1, r2, r3] = await Promise.all([
-    qrToCanvas(t1),
-    qrToCanvas(t2),
-    qrToCanvas(t3),
-  ]);
+  let r1, r2, r3;
+  try {
+    [r1, r2, r3] = await Promise.all([
+      qrToCanvas(t1),
+      qrToCanvas(t2),
+      qrToCanvas(t3),
+    ]);
+  } catch {
+    return { colorDataUrl: null, layerDataUrls: null, error: 'CAPACITY_EXCEEDED' };
+  }
 
   // Composite canvas
   const canvas = document.createElement('canvas');
@@ -80,6 +85,7 @@ export async function generateColorQR(text1, text2, text3) {
   return {
     colorDataUrl: canvas.toDataURL(),
     layerDataUrls: [l1.toDataURL(), l2.toDataURL(), l3.toDataURL()],
+    error: null,
   };
 }
 

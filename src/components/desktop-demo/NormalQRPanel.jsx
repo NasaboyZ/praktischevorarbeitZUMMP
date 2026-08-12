@@ -1,8 +1,10 @@
-import { TriangleAlert } from 'lucide-react';
-import { getCapacityInfo, QR_CAPACITY_BY_LEVEL } from '../../lib/data';
+import { TriangleAlert, LockKeyhole } from 'lucide-react';
+import { QR_CAPACITY_BY_LEVEL } from '../../lib/data';
 
 export default function NormalQRPanel({ qrState, dataSize }) {
-  const cap = getCapacityInfo(dataSize);
+  // Darken on either signal: the real encoder failing, or the visible data-size
+  // estimate (which also counts referenced photo/audio bytes) crossing the M-level cap.
+  const exceeded = qrState.error === 'CAPACITY_EXCEEDED' || dataSize > QR_CAPACITY_BY_LEVEL.M;
 
   return (
     <div className="mx-auto flex h-full w-full max-w-100 flex-col rounded-3xl bg-white px-9 py-9 shadow-[0_20px_60px_rgba(255,87,87,0.08)]">
@@ -14,8 +16,24 @@ export default function NormalQRPanel({ qrState, dataSize }) {
         </p>
       </div>
 
-      <div className="mb-7 flex aspect-square w-full items-center justify-center rounded-2xl bg-[rgba(255,87,87,0.05)]">
-        {qrState.dataUrl ? (
+      <div
+        className={`mb-7 flex aspect-square w-full flex-col items-center justify-center gap-3 rounded-2xl transition-colors duration-500 ${
+          exceeded ? 'bg-(--tx-primary)' : 'bg-[rgba(255,87,87,0.05)]'
+        }`}
+      >
+        {exceeded ? (
+          <>
+            <LockKeyhole className="size-9 text-(--r)" />
+            <div className="text-center">
+              <div className="font-mono text-xs font-bold tracking-widest text-white">
+                KAPAZITÄT ÜBERSCHRITTEN
+              </div>
+              <div className="mt-1 font-mono text-[11px] text-white/50">
+                Fläche reicht nicht mehr aus
+              </div>
+            </div>
+          </>
+        ) : qrState.dataUrl ? (
           <img
             src={qrState.dataUrl}
             alt="Normaler QR-Code"
@@ -41,10 +59,12 @@ export default function NormalQRPanel({ qrState, dataSize }) {
         </div>
       </div>
 
-      <div className="mt-6 flex items-start gap-2.5 rounded-2xl bg-[rgba(109,91,208,0.07)] p-4 text-sm leading-[1.6] text-(--tx-secondary)">
-        <TriangleAlert className="mt-0.5 size-4 shrink-0 text-(--violet)" />
-        {cap.exceeded
-          ? <span><strong className="text-(--err)">Kapazität überschritten:</strong> Zu viele Daten für eine Fläche — der Code bricht zusammen.</span>
+      <div className={`mt-6 flex items-start gap-2.5 rounded-2xl p-4 text-sm leading-[1.6] transition-colors duration-500 ${
+        exceeded ? 'bg-[rgba(255,87,87,0.08)] text-(--tx-secondary)' : 'bg-[rgba(109,91,208,0.07)] text-(--tx-secondary)'
+      }`}>
+        <TriangleAlert className={`mt-0.5 size-4 shrink-0 ${exceeded ? 'text-(--r)' : 'text-(--violet)'}`} />
+        {exceeded
+          ? <span><strong className="text-(--r)">Kapazität überschritten:</strong> Zu viele Daten für eine Fläche — der Code bricht zusammen.</span>
           : <span><strong className="text-(--tx-primary)">Warnung:</strong> Längerer Text führt zu unleserlich feinen Rastern.</span>}
       </div>
     </div>

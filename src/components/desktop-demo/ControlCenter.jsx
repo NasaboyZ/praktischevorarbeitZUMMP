@@ -79,7 +79,7 @@ export default function ControlCenter({
           Bachelorarbeit Demo
         </span>
         <h1 className="font-serif text-[42px] font-bold leading-[1.15]">
-          Emotionaler<br />Multiplex-Tracker
+          Emotionaler<br />Multi-Layer QR-Code
         </h1>
         <p className="mx-auto mt-3 max-w-105 text-sm leading-[1.7] text-(--tx-secondary)">
           Codieren Sie Ihre tägliche Gefühlswelt direkt über RGB-Farbkanäle. Wählen Sie ein Datum

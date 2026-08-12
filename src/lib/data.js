@@ -17,37 +17,23 @@ export function localDateToIso(date) {
   return `${y}-${m}-${d}`;
 }
 
-// Rotating fallback moods for simulated historical entries (stress-test timeline only)
-const SIMULATED_MOODS = [
-  ['entspannt'], ['zufrieden', 'dankbar'], ['gestresst'], ['aufgeregt'],
-  ['traurig'], ['zufrieden'], ['genervt', 'wuetend'],
-];
+// Single-letter mood codes for compact historical stress-test data (365 days must
+// fit next to the real, rich entry — one JSON object per day would blow the budget)
+const SIMULATED_MOOD_CYCLE = ['e', 'z', 'g', 'a', 't', 'z', 'n']; // entspannt/zufrieden/gestresst/aufgeregt/traurig/zufrieden/genervt
 
 export function buildDataModel(userData, timelineDays = 1) {
   const { name, moods, location, text, images, audio, date } = userData;
-  const baseDate = date ? new Date(date) : new Date();
 
-  const entries = [];
-  for (let i = 0; i < Math.min(timelineDays, 365); i++) {
-    const d = new Date(baseDate);
-    d.setDate(d.getDate() - i);
-    const iso = d.toISOString().split('T')[0];
+  // Real entry from user input — the only entry that carries full rich data
+  const realEntry = { date, moods: moods || [], location: location || [], text: text || '' };
+  if (images.length) realEntry.images = images.map((img) => ({ id: img.id, type: img.type, size: img.size }));
+  if (audio)          realEntry.audio = { id: 'audio_001', type: audio.type, duration: audio.duration };
 
-    if (i === 0) {
-      // Real entry from user input
-      const entry = { date: iso, moods: moods || [], location: location || [], text: text || '' };
-      if (images.length) entry.images = images.map((img) => ({ id: img.id, type: img.type, size: img.size }));
-      if (audio)          entry.audio = { id: 'audio_001', type: audio.type, duration: audio.duration };
-      entries.push(entry);
-    } else {
-      // Simulated historical entries
-      entries.push({
-        date: iso,
-        moods: SIMULATED_MOODS[i % SIMULATED_MOODS.length],
-        text: i < 30 ? `Simulated entry for day ${i}` : '',
-      });
-    }
-  }
+  // Simulated history for every prior day, packed as one char/day instead of one object/day
+  // — this is what lets a full year (365 days) actually fit inside the QR capacity budget.
+  const histLen = Math.max(0, Math.min(timelineDays, 365) - 1);
+  let moodHistory = '';
+  for (let i = 0; i < histLen; i++) moodHistory += SIMULATED_MOOD_CYCLE[i % SIMULATED_MOOD_CYCLE.length];
 
   return {
     version: 1,
@@ -56,7 +42,8 @@ export function buildDataModel(userData, timelineDays = 1) {
     created_at: new Date().toISOString(),
     config: { days: timelineDays, has_media: images.length > 0 || !!audio },
     author: name || 'Anonymous',
-    entries,
+    entries: [realEntry],
+    ...(moodHistory ? { mood_history: moodHistory } : {}),
   };
 }
 
@@ -77,13 +64,15 @@ export function buildPayload(userData, timelineDays = 1) {
 }
 
 export function splitDataForLayers(dataModel) {
-  const { entries, ...meta } = dataModel;
-  const n = entries.length;
-  const chunk = Math.ceil(n / 3);
+  const { entries, mood_history, ...meta } = dataModel;
+  const hist = mood_history || '';
+  const third = Math.ceil(hist.length / 3);
 
-  const layer1Data = { ...meta, entries: entries.slice(0, Math.min(chunk, entries.length)) };
-  const layer2Data = { session_id: meta.session_id, entries: entries.slice(chunk, chunk * 2) };
-  const layer3Data = { session_id: meta.session_id, entries: entries.slice(chunk * 2) };
+  // L1 carries the rich real entry + session meta; the compact year-long mood
+  // history is spread evenly across all three channels so every layer stays busy.
+  const layer1Data = { ...meta, entries, mood_history: hist.slice(0, third) };
+  const layer2Data = { session_id: meta.session_id, mood_history: hist.slice(third, third * 2) };
+  const layer3Data = { session_id: meta.session_id, mood_history: hist.slice(third * 2) };
 
   return [
     JSON.stringify(layer1Data),
