@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { connectMobile } from '../lib/ws';
-import { Calendar, Image as ImageIcon, Mic, Database, ChevronDown } from "lucide-react";
+
+// shadcn UI & Icons
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Image as ImageIcon, Mic, Database } from "lucide-react";
 
 const MOOD_ICONS = ['', '😞', '😕', '😐', '😊', '😄'];
 
@@ -36,7 +42,7 @@ function buildLayerPayloads(model) {
   }));
 }
 
-// ── Rekonstruktions-Animation ───────────────────────────────────────────────
+// ── Reconstruction animation ───────────────────────────────────────────────
 function Reconstructing({ onDone }) {
   const [step, setStep] = useState(0);
   const steps = ['Layer 1 entschlüsseln', 'Layer 2 entschlüsseln', 'Layer 3 entschlüsseln', 'Medien wiederherstellen', 'Fertig'];
@@ -63,14 +69,14 @@ function Reconstructing({ onDone }) {
       <div className="font-mono text-[13px] text-blue-500 tracking-widest mb-8">
         REKONSTRUKTION STARTET
       </div>
-      <div className="flex flex-col gap-3 w-full max-w-80">
+      <div className="flex flex-col gap-3 w-full max-w-[320px]">
         {steps.map((s, i) => (
           <motion.div
             key={s}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: i <= step ? 1 : 0.5, y: 0 }}
             transition={{ duration: 0.45, delay: i * 0.07, ease: 'easeOut' }}
-            className={`flex flex-col gap-3 p-4 rounded-2xl bg-background border transition-all duration-300 ${i <= step ? 'border-border' : 'border-transparent'}`}
+            className={`flex flex-col gap-3 p-4 rounded-2xl bg-background border shadow-xs transition-all duration-300 ${i <= step ? 'border-border' : 'border-transparent'}`}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="font-mono text-xs tracking-wider text-foreground">
@@ -104,25 +110,17 @@ function Reconstructing({ onDone }) {
   );
 }
 
-// ── Memory Card Component ──────────────────────────────────────────────────
+// ── Memory Card ────────────────────────────────────────────────────────────
 function MemoryCard({ payload }) {
   const { model, mediaData } = payload;
   const entries = model?.entries ?? [];
   const author = model?.author || 'Anonym';
   const layers = useMemo(() => buildLayerPayloads(model), [model]);
 
-  // Steuerungs-States für Akkordeons (immer nur 1 Element geöffnet)
-  const [openEntryIndex, setOpenEntryIndex] = useState(0);
-  const [isTechDetailsOpen, setIsTechDetailsOpen] = useState(false);
-
-  const toggleEntry = (index) => {
-    setOpenEntryIndex(prev => prev === index ? null : index);
-  };
-
   return (
     <div className="min-h-screen bg-background pb-12 overflow-x-hidden">
       {/* Header */}
-      <div className="px-5 py-6 bg-linear-to-br from-blue-500/10 to-green-500/5 text-center">
+      <div className="px-5 py-6 bg-linear-to-br from-blue-500/10 to-green-500/5 border-b text-center">
         <p className="font-mono text-[10px] text-green-600 dark:text-green-400 tracking-widest mb-1">
           ✓ REKONSTRUKTION ERFOLGREICH
         </p>
@@ -132,149 +130,128 @@ function MemoryCard({ payload }) {
         </p>
       </div>
 
-      <div className="max-w-md mx-auto mt-6 px-4 space-y-4">
+      <div className="max-w-md mx-auto mt-6 space-y-8">
         
-        {/* Vertikale Akkordeon-Liste für Einträge */}
+        {/* Entries Carousel */}
         {entries.length > 0 && (
-          <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="px-1 mb-2 flex items-center justify-between">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="px-5 mb-3 flex items-center justify-between">
               <h2 className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Deine Einträge
               </h2>
               <span className="text-xs text-muted-foreground">{entries.length} Tage</span>
             </div>
-
-            <div className="space-y-3">
-              {entries.map((entry, index) => {
-                const isOpen = openEntryIndex === index;
-                const selectedAudio = entry.audio ? mediaData?.[entry.audio.id] : null;
-
-                return (
-                  <div 
-                    key={entry.date || index}
-                    className="bg-card border border-border/80 rounded-2xl overflow-hidden transition-all duration-200 shadow-xs"
-                  >
-                    {/* Header der Karte mit Datum, umrandetem Mood-Badge & Pfeil */}
-                    <button
-                      type="button"
-                      onClick={() => toggleEntry(index)}
-                      className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-muted/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-4 h-4 text-blue-500 shrink-0" />
-                        <span className="text-sm font-semibold text-foreground">
-                          {formatDate(entry.date)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        {entry.mood != null && (
-                          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-background border border-border text-foreground text-xs font-mono font-semibold shadow-xs">
-                            <span className="text-sm">{MOOD_ICONS[entry.mood]}</span>
-                            <span>{entry.mood}/5</span>
+            
+            <Carousel opts={{ align: "center", dragFree: true }} className="w-full">
+              <CarouselContent className="-ml-4">
+                {entries.map((entry) => {
+                  const selectedAudio = entry.audio ? mediaData?.[entry.audio.id] : null;
+                  
+                  return (
+                    <CarouselItem key={entry.date} className="pl-4 basis-[90%] sm:basis-[85%]">
+                      <Card className="h-full border-border/50 shadow-md bg-card/50 backdrop-blur-sm flex flex-col">
+                        <CardHeader className="pb-3 border-b border-border/50 bg-muted/20">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Calendar className="w-4 h-4" />
+                              <span className="text-sm font-medium">{formatDate(entry.date)}</span>
+                            </div>
+                            <Badge variant="secondary" className="flex gap-1.5 items-center font-mono">
+                              <span className="text-base">{MOOD_ICONS[entry.mood] || '•'}</span>
+                              <span>{entry.mood != null ? `${entry.mood}/5` : '-'}</span>
+                            </Badge>
                           </div>
-                        )}
-                        <ChevronDown 
-                          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-                        />
-                      </div>
-                    </button>
+                        </CardHeader>
+                        
+                        <CardContent className="pt-5 space-y-6 flex-1">
+                          {entry.text ? (
+                            <p className="text-base leading-relaxed text-foreground italic">
+                              „{entry.text}“
+                            </p>
+                          ) : (
+                            <p className="text-sm text-muted-foreground italic">Keine Notiz vorhanden</p>
+                          )}
 
-                    {/* Inhalt der Karte (Lazy-rendered beim Aufklappen) */}
-                    {isOpen && (
-                      <div className="px-4 pb-5 pt-2 space-y-4 animate-in fade-in duration-200">
-                        {entry.text ? (
-                          <p className="text-base leading-relaxed text-foreground italic bg-muted/20 p-3 rounded-xl border border-border/40">
-                            „{entry.text}“
-                          </p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground italic">Keine Notiz vorhanden</p>
-                        )}
+                          {(entry.images?.length > 0 || entry.audio) && (
+                            <div className="space-y-5 pt-2">
+                              {entry.images?.length > 0 && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                                    <ImageIcon className="w-3.5 h-3.5" /> FOTOS
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    {entry.images.map((img) => {
+                                      const media = mediaData?.[img.id];
+                                      return media ? (
+                                        <img
+                                          key={img.id}
+                                          src={media.dataUrl}
+                                          alt="Hochgeladenes Foto"
+                                          className="w-full aspect-square object-cover rounded-xl border border-border shadow-xs"
+                                        />
+                                      ) : null;
+                                    })}
+                                  </div>
+                                </div>
+                              )}
 
-                        {/* Bilder-Grid */}
-                        {entry.images?.length > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                              <ImageIcon className="w-3.5 h-3.5" /> FOTOS
+                              {entry.audio && selectedAudio && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                                    <Mic className="w-3.5 h-3.5" /> SPRACHMEMO
+                                  </div>
+                                  <div className="p-2 rounded-xl bg-muted border flex items-center gap-3">
+                                    <audio controls src={selectedAudio.dataUrl} className="flex-1 h-9" />
+                                    <span className="text-[10px] font-mono text-muted-foreground shrink-0 pr-2">
+                                      {entry.audio.duration}s
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              {entry.images.map((img) => {
-                                const media = mediaData?.[img.id];
-                                return media ? (
-                                  <img
-                                    key={img.id}
-                                    src={media.dataUrl}
-                                    alt="Foto"
-                                    className="w-full aspect-square object-cover rounded-xl border border-border/60 bg-muted"
-                                    loading="lazy"
-                                  />
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Sprachmemo */}
-                        {entry.audio && selectedAudio && (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-                              <Mic className="w-3.5 h-3.5" /> SPRACHMEMO
-                            </div>
-                            <div className="p-2 rounded-xl bg-muted border flex items-center gap-3">
-                              <audio controls src={selectedAudio.dataUrl} className="flex-1 h-9" />
-                              <span className="text-[10px] font-mono text-muted-foreground shrink-0 pr-2">
-                                {entry.audio.duration}s
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+            </Carousel>
           </div>
         )}
 
-        {/* Technische Details Akkordeon */}
-        <div className="pt-2 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-          <div className="w-full bg-card border rounded-2xl overflow-hidden shadow-xs">
-            <button
-              type="button"
-              onClick={() => setIsTechDetailsOpen(!isTechDetailsOpen)}
-              className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 shrink-0">
-                  <Database className="w-4 h-4" />
+        {/* Technical Details Accordion */}
+        <div className="px-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
+          <Accordion type="single" collapsible className="w-full bg-card border rounded-2xl px-4 shadow-xs">
+            <AccordionItem value="layers" className="border-none">
+              <AccordionTrigger className="hover:no-underline py-5">
+                <div className="flex items-center gap-3 text-left">
+                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                    <Database className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold">Technische Details & Layer</span>
+                    <span className="text-xs text-muted-foreground font-normal">
+                      Multiplex QR-Code Daten ansehen
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">Technische Details & Layer</span>
-                  <span className="text-xs text-muted-foreground font-normal">
-                    Multiplex QR-Code Daten ansehen
-                  </span>
-                </div>
-              </div>
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isTechDetailsOpen ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {isTechDetailsOpen && (
-              <div className="p-4 space-y-4 animate-in fade-in duration-200 border-t border-border/50">
+              </AccordionTrigger>
+              <AccordionContent className="space-y-4 pt-2 pb-5">
                 {layers.map((layer) => (
                   <div 
                     key={layer.title} 
-                    className="rounded-xl overflow-hidden border border-border"
+                    className="rounded-xl overflow-hidden border border-border shadow-xs"
                   >
                     <div 
-                      className="flex items-center justify-between p-3.5" 
+                      className="flex items-center justify-between p-4" 
                       style={{ background: layer.background }}
                     >
                       <div>
                         <div className="font-mono text-[10px] tracking-widest" style={{ color: layer.accent }}>
                           {layer.title}
                         </div>
-                        <div className="font-bold text-base" style={{ color: layer.text }}>
+                        <div className="font-bold text-lg" style={{ color: layer.text }}>
                           {layer.itemCount} Einträge
                         </div>
                       </div>
@@ -282,24 +259,23 @@ function MemoryCard({ payload }) {
                         {layer.title === 'Layer 01' ? 'Meta + Daten' : 'Nur Daten'}
                       </div>
                     </div>
-                    <div className="bg-slate-900 p-3 overflow-x-auto">
+                    <div className="bg-slate-900 p-4 overflow-x-auto">
                       <pre className="text-[10px] leading-relaxed text-slate-300 font-mono">
                         {prettifyJson(layer.payload)}
                       </pre>
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
-
       </div>
     </div>
   );
 }
 
-// ── Mobile View (Main Export) ──────────────────────────────────────────────
+// ── Mobile View (main export) ──────────────────────────────────────────────
 export default function MobileView() {
   const params    = new URLSearchParams(window.location.search);
   const sessionId = params.get('s') || '';
@@ -367,7 +343,7 @@ export default function MobileView() {
             EMPFANGE DATEN…
           </div>
           {progress.total > 0 && (
-            <div className="max-w-60 mx-auto">
+            <div className="max-w-80 mx-auto">
               <div className="font-mono text-[10px] text-muted-foreground mb-2 flex justify-between">
                 <span>Lade Segmente</span>
                 <span>{progress.received} / {progress.total}</span>
