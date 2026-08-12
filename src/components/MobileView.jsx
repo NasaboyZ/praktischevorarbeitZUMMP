@@ -40,6 +40,13 @@ function buildLayerPayloads(model) {
 function Reconstructing({ onDone }) {
   const [step, setStep] = useState(0);
   const steps = ['Layer 1 entschlüsseln', 'Layer 2 entschlüsseln', 'Layer 3 entschlüsseln', 'Medien wiederherstellen', 'Fertig'];
+  const bars = [
+    { label: '01', background: '#111827', color: '#FFEB3B' },
+    { label: '02', background: '#F9A8D4', color: '#111827' },
+    { label: '03', background: '#FEF3C7', color: '#111827' },
+    { label: '04', background: '#9DD5FF', color: '#111827' },
+    { label: '05', background: '#9DD5FF', color: '#111827' },
+  ];
 
   useEffect(() => {
     let i = 0;
@@ -52,14 +59,14 @@ function Reconstructing({ onDone }) {
   }, [onDone, steps.length]);
 
   return (
-    <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+    <div style={{ padding: '40px 24px', textAlign: 'center', background: 'linear-gradient(180deg, rgba(190,227,255,0.35) 0%, rgba(255,255,255,0.95) 100%)' }}>
       <div style={{
         fontFamily: 'var(--f-mono)', fontSize: 13, color: 'var(--blue)',
         letterSpacing: '0.1em', marginBottom: 24,
       }}>
-        REKONSTRUIERE DATEN…
+        REKONSTRUKTION STARTET
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 320, margin: '0 auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 320, margin: '0 auto' }}>
         {steps.map((s, i) => (
           <motion.div
             key={s}
@@ -68,21 +75,35 @@ function Reconstructing({ onDone }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: i * 0.07, ease: 'power3.out' }}
             style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '12px 16px', borderRadius: 12,
-              background: i < step ? 'rgba(34,197,94,0.12)' : i === step ? 'rgba(59,138,255,0.12)' : 'var(--bg-surface)',
-              border: `1px solid ${i < step ? 'rgba(34,197,94,0.25)' : i === step ? 'rgba(59,138,255,0.35)' : 'var(--bd-subtle)'}`,
-              transition: 'all 0.4s var(--ease)',
+              display: 'flex', flexDirection: 'column', gap: 12,
+              padding: '16px 18px', borderRadius: 18,
+              background: 'rgba(255,255,255,0.96)',
+              border: '1px solid rgba(15,23,42,0.08)',
+              boxShadow: '0 24px 48px rgba(15,23,42,0.08)',
+              transition: 'all 0.3s var(--ease)',
+              opacity: i <= step ? 1 : 0.5,
             }}>
-            <span style={{ fontSize: 14, width: 24, textAlign: 'center' }}>
-              {i < step ? '✓' : i === step ? '⠿' : '○'}
-            </span>
-            <span style={{
-              fontFamily: 'var(--f-mono)', fontSize: 12,
-              color: i < step ? 'var(--ok)' : i === step ? 'var(--blue)' : 'var(--tx-dim)',
-            }}>
-              {s}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, letterSpacing: '0.14em', color: 'var(--tx-primary)' }}>
+                {s}
+              </div>
+              <span style={{ fontFamily: 'var(--f-mono)', fontSize: 12, fontWeight: 700, color: 'var(--tx-muted)' }}>
+                {bars[i].label}
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 48, height: 28, borderRadius: 14, background: bars[i].background, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: bars[i].color }}>{bars[i].label}</span>
+              </div>
+              <div style={{ flex: 1, height: 10, borderRadius: 999, background: 'rgba(15,23,42,0.08)' }}>
+                <div style={{
+                  width: i <= step ? '100%' : '0%',
+                  height: '100%', borderRadius: 999,
+                  background: bars[i].background,
+                  transition: 'width 0.35s ease',
+                }} />
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
