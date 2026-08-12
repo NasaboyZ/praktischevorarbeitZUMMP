@@ -111,8 +111,8 @@ function MemoryCard({ payload }) {
   const author = model?.author || 'Anonym';
   const layers = useMemo(() => buildLayerPayloads(model), [model]);
 
-  // Steuerungs-States für Akkordeons (immer nur max. 1 Element geöffnet)
-  const [openEntryIndex, setOpenEntryIndex] = useState(0); // Erstes Element standardmäßig offen
+  // Steuerungs-States für Akkordeons (immer nur 1 Element geöffnet)
+  const [openEntryIndex, setOpenEntryIndex] = useState(0);
   const [isTechDetailsOpen, setIsTechDetailsOpen] = useState(false);
 
   const toggleEntry = (index) => {
@@ -134,7 +134,7 @@ function MemoryCard({ payload }) {
 
       <div className="max-w-md mx-auto mt-6 px-4 space-y-4">
         
-        {/* Vertikale Einträge als Akkordeon-Liste */}
+        {/* Vertikale Akkordeon-Liste für Einträge */}
         {entries.length > 0 && (
           <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="px-1 mb-2 flex items-center justify-between">
@@ -152,9 +152,9 @@ function MemoryCard({ payload }) {
                 return (
                   <div 
                     key={entry.date || index}
-                    className="bg-card border rounded-2xl overflow-hidden transition-all duration-200"
+                    className="bg-card border border-border/80 rounded-2xl overflow-hidden transition-all duration-200 shadow-xs"
                   >
-                    {/* Akkordeon-Header (Klickbar zum Öffnen/Schließen) */}
+                    {/* Header der Karte mit Datum, umrandetem Mood-Badge & Pfeil */}
                     <button
                       type="button"
                       onClick={() => toggleEntry(index)}
@@ -167,10 +167,10 @@ function MemoryCard({ payload }) {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         {entry.mood != null && (
-                          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-mono">
-                            <span>{MOOD_ICONS[entry.mood]}</span>
+                          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-background border border-border text-foreground text-xs font-mono font-semibold shadow-xs">
+                            <span className="text-sm">{MOOD_ICONS[entry.mood]}</span>
                             <span>{entry.mood}/5</span>
                           </div>
                         )}
@@ -180,11 +180,11 @@ function MemoryCard({ payload }) {
                       </div>
                     </button>
 
-                    {/* Akkordeon-Inhalt (Lazy-rendered: Erzeugt nur DOM wenn geöffnet) */}
+                    {/* Inhalt der Karte (Lazy-rendered beim Aufklappen) */}
                     {isOpen && (
-                      <div className="px-4 pb-5 pt-2 space-y-5 animate-in fade-in duration-200">
+                      <div className="px-4 pb-5 pt-2 space-y-4 animate-in fade-in duration-200">
                         {entry.text ? (
-                          <p className="text-base leading-relaxed text-foreground italic bg-muted/20 p-3 rounded-xl">
+                          <p className="text-base leading-relaxed text-foreground italic bg-muted/20 p-3 rounded-xl border border-border/40">
                             „{entry.text}“
                           </p>
                         ) : (
@@ -205,7 +205,7 @@ function MemoryCard({ payload }) {
                                     key={img.id}
                                     src={media.dataUrl}
                                     alt="Foto"
-                                    className="w-full aspect-square object-cover rounded-xl bg-muted"
+                                    className="w-full aspect-square object-cover rounded-xl border border-border/60 bg-muted"
                                     loading="lazy"
                                   />
                                 ) : null;
@@ -220,7 +220,7 @@ function MemoryCard({ payload }) {
                             <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
                               <Mic className="w-3.5 h-3.5" /> SPRACHMEMO
                             </div>
-                            <div className="p-2 rounded-xl bg-muted flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-muted border flex items-center gap-3">
                               <audio controls src={selectedAudio.dataUrl} className="flex-1 h-9" />
                               <span className="text-[10px] font-mono text-muted-foreground shrink-0 pr-2">
                                 {entry.audio.duration}s
@@ -239,7 +239,7 @@ function MemoryCard({ payload }) {
 
         {/* Technische Details Akkordeon */}
         <div className="pt-2 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-          <div className="w-full bg-card border rounded-2xl overflow-hidden">
+          <div className="w-full bg-card border rounded-2xl overflow-hidden shadow-xs">
             <button
               type="button"
               onClick={() => setIsTechDetailsOpen(!isTechDetailsOpen)}
@@ -260,7 +260,7 @@ function MemoryCard({ payload }) {
             </button>
             
             {isTechDetailsOpen && (
-              <div className="p-4 space-y-4 animate-in fade-in duration-200">
+              <div className="p-4 space-y-4 animate-in fade-in duration-200 border-t border-border/50">
                 {layers.map((layer) => (
                   <div 
                     key={layer.title} 
