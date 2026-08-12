@@ -114,10 +114,12 @@ function Reconstructing({ onDone }) {
 // ── Memory Card ────────────────────────────────────────────────────────────
 function MemoryCard({ payload }) {
   const { model, mediaData } = payload;
-  const latestEntry = model?.entries?.[0];
+  const entries = model?.entries ?? [];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedEntry = entries[selectedIndex];
   const author = model?.author || 'Anonym';
   const layers = useMemo(() => buildLayerPayloads(model), [model]);
-  const latestAudio = latestEntry?.audio ? mediaData?.[latestEntry.audio.id] : null;
+  const selectedAudio = selectedEntry?.audio ? mediaData?.[selectedEntry.audio.id] : null;
 
   return (
     <div style={{
@@ -226,8 +228,39 @@ function MemoryCard({ payload }) {
           </div>
         </div>
 
-        {/* Latest entry */}
-        {latestEntry && (
+        {entries.length > 0 && (
+          <div style={{ marginBottom: 18, animation: 'fadeUp 0.5s var(--ease) both' }}>
+            <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)', marginBottom: 10 }}>
+              EINTRÄGE NACH TAG — Wähle einen Tag, um die Details zu sehen
+            </div>
+            <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+              {entries.map((entry, i) => (
+                <button
+                  key={entry.date}
+                  type="button"
+                  onClick={() => setSelectedIndex(i)}
+                  style={{
+                    flex: '0 0 auto', minWidth: 110, padding: '12px 14px', border: '1px solid',
+                    borderColor: i === selectedIndex ? 'var(--blue)' : 'rgba(148,163,184,0.35)',
+                    borderRadius: 16,
+                    background: i === selectedIndex ? 'rgba(59,138,255,0.08)' : 'rgba(255,255,255,0.92)',
+                    color: i === selectedIndex ? 'var(--tx-primary)' : 'var(--tx-secondary)',
+                    textAlign: 'left', cursor: 'pointer', boxShadow: i === selectedIndex ? '0 12px 24px rgba(59,138,255,0.12)' : 'none',
+                  }}
+                >
+                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+                    Tag {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div style={{ marginTop: 6, fontFamily: 'var(--f-mono)', fontSize: 12, fontWeight: 700 }}>
+                    {formatDate(entry.date)}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {selectedEntry && (
           <div style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--bd-default)',
@@ -244,118 +277,132 @@ function MemoryCard({ payload }) {
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-secondary)' }}>
-                {formatDate(latestEntry.date)}
+                {formatDate(selectedEntry.date)}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 22 }}>{MOOD_ICONS[latestEntry.mood]}</span>
+                <span style={{ fontSize: 22 }}>{MOOD_ICONS[selectedEntry.mood] || '•'}</span>
                 <div>
                   <div style={{ fontFamily: 'var(--f-mono)', fontSize: 14, fontWeight: 700 }}>
-                    {latestEntry.mood}/5
+                    {selectedEntry.mood != null ? `${selectedEntry.mood}/5` : 'Keine Bewertung'}
                   </div>
                   <div style={{ fontFamily: 'var(--f-mono)', fontSize: 9, color: 'var(--tx-muted)' }}>
-                    {MOOD_LABELS[latestEntry.mood]}
+                    {selectedEntry.mood != null ? MOOD_LABELS[selectedEntry.mood] : 'Keine Stimmung angegeben'}
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Text */}
-            {latestEntry.text && (
+            {selectedEntry.text && (
               <div style={{ padding: '14px 16px' }}>
                 <div style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--tx-primary)', fontStyle: 'italic' }}>
-                  „{latestEntry.text}"
+                  „{selectedEntry.text}"
                 </div>
               </div>
             )}
 
-            {/* Images */}
-            {latestEntry.images?.length > 0 && (
-              <div style={{ padding: '0 16px 14px' }}>
-                <div className="label" style={{ marginBottom: 8 }}>FOTOS</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 8 }}>
-                  {latestEntry.images.map((img) => {
-                    const media = mediaData?.[img.id];
-                    return media ? (
-                      <img
-                        key={img.id}
-                        src={media.dataUrl}
-                        alt="Hochgeladenes Foto"
-                        style={{
-                          width: '100%',
-                          aspectRatio: '1',
-                          objectFit: 'cover',
-                          borderRadius: 8,
-                          border: '1px solid var(--bd-subtle)',
-                          animation: 'fadeUp 0.5s var(--ease) both',
-                        }}
-                      />
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            )}
+            {/* Media + extras */}
+            <div style={{ padding: '0 16px 14px' }}>
+              <div style={{ display: 'grid', gap: 12 }}>
+                {selectedEntry.images?.length > 0 && (
+                  <div>
+                    <div className="label" style={{ marginBottom: 8 }}>FOTOS</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 8 }}>
+                      {selectedEntry.images.map((img) => {
+                        const media = mediaData?.[img.id];
+                        return media ? (
+                          <img
+                            key={img.id}
+                            src={media.dataUrl}
+                            alt="Hochgeladenes Foto"
+                            style={{
+                              width: '100%',
+                              aspectRatio: '1',
+                              objectFit: 'cover',
+                              borderRadius: 8,
+                              border: '1px solid var(--bd-subtle)',
+                              animation: 'fadeUp 0.5s var(--ease) both',
+                            }}
+                          />
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
 
-            {/* Audio */}
-            {latestEntry.audio && latestAudio && (
-              <div style={{ padding: '0 16px 14px' }}>
-                <div className="label" style={{ marginBottom: 8 }}>SPRACHMEMO</div>
-                <div style={{
-                  padding: '10px 14px', borderRadius: 10,
-                  background: 'var(--bg-surface)', border: '1px solid var(--bd-default)',
-                  display: 'flex', alignItems: 'center', gap: 12,
-                }}>
-                  <span style={{ fontSize: 18 }}>🎙</span>
-                  <audio controls src={latestAudio.dataUrl} style={{ flex: 1, height: 32 }} />
-                  <span style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', flexShrink: 0 }}>
-                    {latestEntry.audio.duration}s
-                  </span>
+                {selectedEntry.audio && selectedAudio && (
+                  <div>
+                    <div className="label" style={{ marginBottom: 8 }}>SPRACHMEMO</div>
+                    <div style={{
+                      padding: '10px 14px', borderRadius: 10,
+                      background: 'var(--bg-surface)', border: '1px solid var(--bd-default)',
+                      display: 'flex', alignItems: 'center', gap: 12,
+                    }}>
+                      <span style={{ fontSize: 18 }}>🎙</span>
+                      <audio controls src={selectedAudio.dataUrl} style={{ flex: 1, height: 32 }} />
+                      <span style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', flexShrink: 0 }}>
+                        {selectedEntry.audio.duration}s
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, padding: '12px 0 0' }}>
+                  <div style={{ flex: '1 1 150px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--bd-subtle)', padding: 12 }}>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginBottom: 6 }}>BILDER</div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-primary)' }}>
+                      {selectedEntry.images?.length ?? 0}
+                    </div>
+                  </div>
+                  <div style={{ flex: '1 1 150px', borderRadius: 12, background: 'var(--bg-surface)', border: '1px solid var(--bd-subtle)', padding: 12 }}>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 10, color: 'var(--tx-muted)', marginBottom: 6 }}>AUDIO</div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-primary)' }}>
+                      {selectedEntry.audio ? 'Ja' : 'Nein'}
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         )}
 
-        {/* Timeline if multiple entries */}
-        {model?.entries?.length > 1 && (
+        {entries.length > 1 && (
           <div style={{ animation: 'fadeUp 0.5s var(--ease) 0.2s both' }}>
             <div className="label" style={{ marginBottom: 12 }}>
-              TIMELINE — {model.entries.length} EINTRÄGE
+              WEITERE EINTRÄGE
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {model.entries.slice(1, 6).map((entry, i) => (
-                <div key={entry.date || i} style={{
-                  padding: '10px 14px', borderRadius: 10,
-                  background: 'var(--bg-card)', border: '1px solid var(--bd-subtle)',
-                  display: 'flex', alignItems: 'center', gap: 12,
-                }}>
-                  <span style={{ fontSize: 18 }}>{MOOD_ICONS[entry.mood]}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)' }}>
-                      {formatDate(entry.date)}
-                    </div>
-                    {entry.text && (
-                      <div style={{ fontSize: 12, color: 'var(--tx-muted)', marginTop: 2 }}>
-                        {entry.text.slice(0, 60)}{entry.text.length > 60 ? '…' : ''}
+            <div style={{ display: 'grid', gap: 10 }}>
+              {entries.map((entry, i) => (
+                <button
+                  key={entry.date}
+                  type="button"
+                  onClick={() => setSelectedIndex(i)}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '12px 14px',
+                    borderRadius: 14,
+                    border: i === selectedIndex ? '1px solid var(--blue)' : '1px solid var(--bd-subtle)',
+                    background: i === selectedIndex ? 'rgba(59,138,255,0.08)' : 'var(--bg-card)',
+                    color: 'var(--tx-primary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--f-mono)', fontSize: 11, color: 'var(--tx-secondary)' }}>
+                        {formatDate(entry.date)}
                       </div>
-                    )}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, fontSize: 11, color: 'var(--tx-muted)' }}>
-                      <span>{entry.images?.length ? `${entry.images.length} Foto${entry.images.length > 1 ? 's' : ''}` : 'Keine Fotos'}</span>
-                      <span>{entry.audio ? 'Audio vorhanden' : 'Kein Audio'}</span>
+                      <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 700 }}>
+                        {entry.text ? entry.text.slice(0, 40) : 'Keine Notiz vorhanden'}
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: 12, color: 'var(--tx-muted)' }}>
+                      {entry.mood != null ? `${entry.mood}/5` : '-'}
                     </div>
                   </div>
-                  <div style={{ fontFamily: 'var(--f-mono)', fontSize: 13, fontWeight: 600 }}>
-                    {entry.mood}/5
-                  </div>
-                </div>
+                </button>
               ))}
-              {model.entries.length > 6 && (
-                <div style={{
-                  textAlign: 'center', fontFamily: 'var(--f-mono)', fontSize: 11,
-                  color: 'var(--tx-muted)', padding: '8px',
-                }}>
-                  + {model.entries.length - 6} weitere Einträge
-                </div>
-              )}
             </div>
           </div>
         )}
