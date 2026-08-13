@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   buildDataModel, buildPayload, splitDataForLayers,
-  calculateDataSize, generateSessionId,
+  calculateDataSize, generateSessionId, createEmptyEntry, localDateToIso,
+  mergeDraftIntoEntries,
 } from '../lib/data';
 import { generateColorQR, tryGenerateNormalQR, generateSessionQR } from '../lib/qr';
 import { connectDesktop, sendPayload, getMobileBaseUrl } from '../lib/ws';
@@ -17,6 +18,7 @@ export default function DesktopDemo() {
     try { return localStorage.getItem('mlqr-name') || ''; } catch { return ''; }
   });
   const [entries,  setEntries]  = useState([]);
+  const [draft,    setDraft]    = useState(() => createEmptyEntry(localDateToIso(new Date())));
   const [normalQR,    setNormalQR]    = useState({ dataUrl: null, error: null, size: 0 });
   const [colorQR,     setColorQR]     = useState(null);
   const [sessionQR,   setSessionQR]   = useState(null);
@@ -36,7 +38,9 @@ export default function DesktopDemo() {
     try { localStorage.setItem('mlqr-name', name); } catch { /* private mode etc. */ }
   }, [name]);
 
-  const dataSize = calculateDataSize(entries, { sessionId, name });
+  // Include the in-progress draft so the capacity counters update live while
+  // the user is still filling out a day, not just after committing it.
+  const dataSize = calculateDataSize(mergeDraftIntoEntries(entries, draft), { sessionId, name });
 
   const mobileUrl = `${getMobileBaseUrl()}/?mobile=1&s=${sessionId}`;
 
@@ -93,6 +97,8 @@ export default function DesktopDemo() {
         <ControlCenter
           entries={entries}
           setEntries={setEntries}
+          draft={draft}
+          setDraft={setDraft}
           name={name}
           setName={setName}
           dataSize={dataSize}

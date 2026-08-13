@@ -87,6 +87,14 @@ export function getLayerSizes(entries) {
   return buckets;
 }
 
+// Merge an in-progress draft entry into the committed list, keyed by date —
+// same replace-or-append rule ControlCenter uses when actually committing.
+export function mergeDraftIntoEntries(entries, draft) {
+  const idx = entries.findIndex((e) => e.date === draft.date);
+  if (idx === -1) return [...entries, draft];
+  const next = [...entries]; next[idx] = draft; return next;
+}
+
 export function calculateDataSize(entries, meta = {}) {
   const model = buildDataModel(entries, meta);
   let base = new TextEncoder().encode(JSON.stringify(model)).length;

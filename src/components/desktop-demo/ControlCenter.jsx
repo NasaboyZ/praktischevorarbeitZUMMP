@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
   formatSize, isoToLocalDate, localDateToIso, addDaysIso,
-  createEmptyEntry, getLayerSizes,
+  createEmptyEntry, getLayerSizes, mergeDraftIntoEntries,
 } from '../../lib/data';
 import ImageUpload from './ImageUpload';
 import AudioRecorder from './AudioRecorder';
@@ -102,9 +102,8 @@ function latestDate(entries, fallback) {
   return entries.length ? entries.reduce((max, e) => (e.date > max ? e.date : max), entries[0].date) : fallback;
 }
 
-export default function ControlCenter({ entries, setEntries, name, setName, dataSize, onGenerate }) {
+export default function ControlCenter({ entries, setEntries, draft, setDraft, name, setName, dataSize, onGenerate }) {
   const [step, setStep] = useState(1);
-  const [draft, setDraft] = useState(() => createEmptyEntry(localDateToIso(new Date())));
   const [justGenerated, setJustGenerated] = useState(false);
   const [customMoods, setCustomMoods] = useState([]);
   const [customLocations, setCustomLocations] = useState([]);
@@ -131,11 +130,7 @@ export default function ControlCenter({ entries, setEntries, name, setName, data
   };
 
   const commitDraft = () => {
-    setEntries((prev) => {
-      const idx = prev.findIndex((e) => e.date === draft.date);
-      if (idx === -1) return [...prev, draft];
-      const next = [...prev]; next[idx] = draft; return next;
-    });
+    setEntries((prev) => mergeDraftIntoEntries(prev, draft));
   };
 
   const handleAddAnotherDay = () => {
