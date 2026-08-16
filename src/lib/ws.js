@@ -4,7 +4,6 @@ import * as Ably from 'ably';
 const KEY = import.meta.env.VITE_ABLY_KEY;
 const ch  = (id) => `mlqr:${id}`;
 
-export function hasAblyKey() { return !!KEY; }
 export function getMobileBaseUrl() { return window.location.origin; }
 
 // Split a string into ≤48 KB slices (Ably free limit is 65 KB per message)

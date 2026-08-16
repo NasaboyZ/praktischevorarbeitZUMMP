@@ -278,7 +278,7 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
               onClick={handleFinish}
               className="h-12 gap-1.5 rounded-full bg-(--tx-primary) px-6 text-base font-bold text-white hover:bg-(--tx-primary)/85"
             >
-              Fertig — weiter <ArrowRight className="size-4" />
+              Weiter <ArrowRight className="size-4" />
             </Button>
           </div>
         </div>
