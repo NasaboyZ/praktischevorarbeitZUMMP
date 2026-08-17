@@ -133,12 +133,6 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
     setEntries((prev) => mergeDraftIntoEntries(prev, draft));
   };
 
-  const handleAddAnotherDay = () => {
-    commitDraft();
-    setDraft(createEmptyEntry(addDaysIso(draft.date, 1)));
-    setStep(1);
-  };
-
   const handleFinish = () => {
     commitDraft();
     setStep(3);
@@ -168,8 +162,8 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
           Emotionaler<br />Multi-Layer QR-Code
         </h1>
         <p className="mx-auto mt-3 max-w-105 text-sm leading-[1.7] text-(--tx-secondary)">
-          Codieren Sie Ihre tägliche Gefühlswelt direkt über RGB-Farbkanäle. Wählen Sie ein Datum
-          und erfassen Sie Ihren Zustand.
+          Deine Eingaben werden nicht dauerhaft gespeichert. Sie bleiben während der Demo lokal in
+          deinem Browser und werden beim Neuladen der Seite gelöscht.
         </p>
       </div>
 
@@ -230,14 +224,6 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
 
       {step === 2 && (
         <div className="flex flex-col gap-5">
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            className="flex w-fit items-center gap-1.5 text-sm font-semibold text-(--tx-secondary) hover:text-(--tx-primary)"
-          >
-            <ArrowLeft className="size-3.5" /> zurück
-          </button>
-
           <div className="rounded-2xl border border-(--bd-subtle) p-5">
             <div className="mb-1 text-base font-bold">Notiz</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Willst du dazu was notieren?</p>
@@ -268,10 +254,10 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
             <Button
               type="button"
               variant="outline"
-              onClick={handleAddAnotherDay}
+              onClick={() => setStep(1)}
               className="h-12 gap-1.5 rounded-full border-(--bd-strong) px-6 text-base font-bold"
             >
-              <Plus className="size-4" /> Weiteren Tag hinzufügen
+              <ArrowLeft className="size-4" /> Zurück
             </Button>
             <Button
               type="button"

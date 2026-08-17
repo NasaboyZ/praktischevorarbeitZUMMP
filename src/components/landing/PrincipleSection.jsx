@@ -19,9 +19,9 @@ export default function PrincipleSection({ onStart }) {
             <span className="text-[#8FA6C9]">wann immer dir danach ist</span>
           </h2>
           <p className="mb-7 max-w-140 text-base leading-[1.75] text-(--tx-secondary)">
-            Jede Eingabe wird sofort verarbeitet. Enthält ein Eintrag außergewöhnlich viele Daten —
-            Text, Foto, Sprachmemo — erkennt das System das automatisch und bereitet ihn für die
-            Kodierung in den farbigen Multi-Layer QR-Code vor.
+            Jede Eingabe wird lokal im Browser verarbeitet. Datum, Stimmung, Text und Medien machen
+            dabei live sichtbar, wie schnell die Kapazität eines normalen QR-Codes erreicht ist — und
+            wie mehrere rekonstruierbare Layer dieselbe Codefläche erweitern.
           </p>
           <Button onClick={onStart} className="h-11 rounded-full px-8 font-bold">
             Demo starten

@@ -62,24 +62,24 @@ export default function ConceptSection() {
           <div>
             <Badge className="mb-5">Das Konzept</Badge>
             <h2 className="mb-5 text-[38px] font-extrabold leading-tight">
-              Was ist ein<br />Multi-Layer QR-Code?
+              Das Noppakaew-Prinzip<br />hinter dem Multi-Layer QR
             </h2>
             <p className="mb-5 text-base leading-[1.8] text-(--tx-secondary)">
-              Ein normaler QR-Code hat <strong className="text-(--tx-primary)">eine Oberfläche</strong> —
-              damit eine feste Kapazitätsgrenze von ~2 KB.
-              Bei Fotos, Tagebucheinträgen und Sprachnotizen reicht das nicht.
+              Zuerst werden die Daten auf mehrere gleich große Schwarz-Weiß-QR-Codes verteilt.
+              Deren helle Module erhalten unterschiedliche Intensitäten in Rot, Grün oder Blau und
+              werden anschließend <strong className="text-(--tx-primary)">pixelgenau überlagert</strong>.
             </p>
             <p className="mb-8 text-base leading-[1.8] text-(--tx-secondary)">
-              Mein Ansatz: Drei unabhängige QR-Codes werden über die
-              <strong className="text-(--tx-primary)"> RGB-Farbkanäle</strong> zu einem einzigen
-              farbigen Code kombiniert. Das Ergebnis:{' '}
-              <strong className="text-(--blue)">3× mehr Kapazität</strong> auf derselben Fläche.
+              Die Intensitätswerte stammen aus einer Partition von <strong className="text-(--tx-primary)">255</strong>,
+              aufgebaut mit einer geometrischen Folge. Dadurch bleibt jede Summe eindeutig: Beim
+              Entschichten lässt sich erkennen, welche ursprünglichen QR-Layer an einem Pixel hell oder
+              dunkel waren. Die Demo zeigt den verständlichen Spezialfall mit drei Ebenen — je einer in R, G und B.
             </p>
             <AnimatedGroup preset="slide" className="flex flex-col gap-3">
               {[
-                { color: '#FF5757', label: 'Roter Kanal (L1)', desc: 'Session-Routing & Basis-Metadaten' },
-                { color: '#22C55E', label: 'Grüner Kanal (L2)', desc: 'Strukturierte Stimmungs- & Textdaten' },
-                { color: '#3B8AFF', label: 'Blauer Kanal (L3)', desc: 'Medien, Binär & Audio-Payloads' },
+                { color: '#FF5757', label: '1. QR-Layer erzeugen', desc: 'Daten werden auf gleich große Schwarz-Weiß-Codes verteilt.' },
+                { color: '#22C55E', label: '2. Intensitäten zuweisen', desc: 'Eindeutige Werte aus einer Partition von 255 färben die hellen Module.' },
+                { color: '#3B8AFF', label: '3. Layer überlagern', desc: 'Die Summen in den RGB-Kanälen bilden einen farbigen MLQR-Code.' },
               ].map(({ color, label, desc }) => (
                 <div
                   key={label}
@@ -131,21 +131,21 @@ export default function ConceptSection() {
               >
                 <ColorQR size={88} />
                 <div className="mt-1.5 font-mono text-[10px] font-bold text-(--blue)">
-                  3× Kapazität
+                  3 Layer · 1 Code
                 </div>
               </motion.div>
             </div>
 
             <div className="max-w-90 rounded-xl border border-[rgba(59,138,255,0.15)] bg-[rgba(59,138,255,0.05)] px-5 py-4 text-center text-sm leading-[1.6] text-(--tx-secondary)">
-              Durch <strong className="text-(--blue)">Farb-Multiplexing</strong> trägt jedes Pixel
-              drei Bits gleichzeitig — eines pro Farbkanal.
+              Weil die Intensitätssummen eindeutig zerlegt werden können, lassen sich die einzelnen
+              Schwarz-Weiß-Layer später wieder aus dem farbigen Code rekonstruieren.
             </div>
 
             {/* Capacity bars */}
             <div className="w-full max-w-90 rounded-xl border border-(--bd-subtle) bg-[#F5F8FF] px-4.5 py-4">
               {[
-                { label: 'Normal QR', pct: 33, color: '#EF4444', note: '~2 KB max' },
-                { label: 'Multi-Layer QR', pct: 100, color: '#22C55E', note: '~6 KB+' },
+                { label: 'Normaler QR', pct: 33, color: '#EF4444', note: '1 Datenebene' },
+                { label: 'Demo-MLQR', pct: 100, color: '#22C55E', note: '3 Datenebenen' },
               ].map(({ label, pct, color, note }) => (
                 <div key={label} className="mb-2.5">
                   <div className="mb-1 flex justify-between">

@@ -9,10 +9,10 @@ export default function Hero({ onStart }) {
       <div className="mx-auto flex max-w-200 flex-col items-center">
         <h1 className="m-0 text-[clamp(36px,6vw,72px)] font-extrabold leading-[1.15]">
           <TextEffect as="span" preset="fade-in-blur" delay={0.15} style={{ display: 'block' }}>
-            Stimmung entschlüsseln,
+            Mehr Daten. Eine Fläche.
           </TextEffect>
           <TextEffect as="span" preset="fade-in-blur" delay={0.35} style={{ display: 'block', color: '#8FA6C9' }}>
-            Multi-Layer QR erleben
+            Lokal übertragen mit Multi-Layer QR.
           </TextEffect>
         </h1>
 
@@ -22,9 +22,8 @@ export default function Hero({ onStart }) {
           transition={{ delay: 0.7, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto mt-6 max-w-145 text-lg leading-[1.75] text-(--tx-secondary)"
         >
-          Ein interaktives Demo, das zeigt wie{' '}
-          <strong className="text-(--tx-primary)">RGB-Farb-Multiplexing</strong> private
-          Mood-Daten sicher überträgt — ohne Server, ohne Cloud, in Echtzeit.
+          Erlebe, wie mehrere QR-Ebenen nach dem Prinzip von Noppakaew in einem farbigen Code
+          zusammenkommen — und warum lokaler Datentransfer mehr sein kann als ein gewöhnlicher QR-Code.
         </motion.p>
 
         <motion.div
@@ -37,7 +36,7 @@ export default function Hero({ onStart }) {
             Demo starten
           </Button>
           <span className="font-mono text-[13px] text-(--tx-muted)">
-            Kein Login · Kein Server · 100% Lokal
+            Kein Login · Eingaben bleiben bis zum Transfer lokal im Browser
           </span>
         </motion.div>
       </div>

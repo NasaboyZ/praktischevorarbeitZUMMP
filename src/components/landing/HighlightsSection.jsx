@@ -10,13 +10,13 @@ const HIGHLIGHTS = [
     icon: Workflow,
     pattern: quadrate,
     value: '100%',
-    desc: 'Läuft vollständig im Browser – eine einzelne HTML-Datei, kein Server, keine Installation.',
+    desc: 'Die QR-Erzeugung und Farbverarbeitung laufen direkt in deinem Browser – ohne Installation.',
   },
   {
     icon: Lock,
     pattern: kreiss,
     value: 'Privat',
-    desc: 'Deine Stimmungsdaten verlassen nie dein Gerät – übertragen wird nur ein kurzlebiger QR-Code.',
+    desc: 'Deine Eingaben werden nicht dauerhaft gespeichert. Erst ein verbundenes Smartphone startet die Transfersitzung.',
   },
   {
     icon: Timer,
