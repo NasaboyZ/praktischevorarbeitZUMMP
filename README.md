@@ -1,17 +1,50 @@
-# React + Vite
+# Emotionaler Multi-Layer-QR-Code
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Dieses Projekt ist eine interaktive Web-Demo im Rahmen einer Bachelorarbeit. Persönliche Erinnerungen wie Stimmung, Ort, Notizen, Bilder und Audio werden erfasst und auf drei QR-Code-Ebenen verteilt. Die Demo vergleicht die Kapazität eines normalen QR-Codes mit einem Multi-Layer-QR-Code und kann die Daten in Echtzeit an ein Smartphone übertragen.
 
-Currently, two official plugins are available:
+Die eingegebenen Daten werden nicht dauerhaft gespeichert. Sie bleiben während der Demo im Browser und werden beim Neuladen gelöscht. Lediglich der eingegebene Name wird lokal gespeichert.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Voraussetzungen
 
-## React Compiler
+- Node.js 20 oder neuer
+- npm
+- Optional: Ably-API-Key für die Übertragung zwischen Computer und Smartphone
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Installation
 
-## Expanding the Oxlint configuration
+1. Repository klonen und in den Projektordner wechseln:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
-# praktischevorarbeitZUMMP
+   ```bash
+   git clone <REPOSITORY-URL>
+   cd Praktische_Vorarbeit
+   ```
+
+2. Abhängigkeiten installieren:
+
+   ```bash
+   npm install
+   ```
+
+3. Entwicklungsserver starten:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Im Browser öffnen:
+
+   ```text
+   http://localhost:5174
+   ```
+
+## Weitere Befehle
+
+```bash
+npm run build    # Produktions-Build erstellen
+npm run preview  # Produktions-Build lokal testen
+npm run lint     # Quellcode prüfen
+```
+
+## Verwendete Technologien
+
+React, Vite, Tailwind CSS, QRCode.

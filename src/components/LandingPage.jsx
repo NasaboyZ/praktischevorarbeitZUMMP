@@ -3,7 +3,6 @@ import PrincipleSection from './landing/PrincipleSection';
 import ConceptSection from './landing/ConceptSection';
 import AboutSection from './landing/AboutSection';
 import HighlightsSection from './landing/HighlightsSection';
-import Footer from './landing/Footer';
 
 export default function LandingPage({ onStart }) {
   return (
@@ -13,7 +12,6 @@ export default function LandingPage({ onStart }) {
       <ConceptSection />
       <AboutSection />
       <HighlightsSection />
-      <Footer />
     </div>
   );
 }
