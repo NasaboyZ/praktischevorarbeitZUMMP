@@ -28,7 +28,7 @@ const HIGHLIGHTS = [
 
 export default function HighlightsSection() {
   return (
-    <section className="bg-white px-10 py-16">
+    <section className="bg-white px-5 py-12 sm:px-10 sm:py-16">
       <div className="mx-auto max-w-270">
         <div className="mb-8 text-right">
           <span className="text-[15px] font-bold italic text-(--tx-secondary)">

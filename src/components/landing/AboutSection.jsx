@@ -49,7 +49,7 @@ export default function AboutSection() {
   return (
     <section id="projekt" className="border-y border-(--bd-subtle) bg-white">
       <div className="grid-bg grid grid-cols-1 border-b border-(--bd-subtle) md:grid-cols-[1fr_minmax(160px,280px)]">
-        <InView className="px-10 py-16 md:pr-16">
+        <InView className="px-5 py-12 sm:px-10 sm:py-16 md:pr-16">
           <h2 className="mb-5 text-[clamp(30px,3.6vw,46px)] font-extrabold leading-tight">
             Vier Schritte bis zum<br />
             <span className="text-[#8FA6C9]">Multi-Layer-Aha-Moment</span>
@@ -73,7 +73,7 @@ export default function AboutSection() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 px-10 py-16 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 px-5 py-12 sm:px-10 sm:py-16 md:grid-cols-2">
         {STEPS.map(({ icon: Icon, title, description, detail, color, background }, index) => (
           <InView key={title}>
             <Card className="h-full gap-0 py-0 ring-(--bd-subtle)">

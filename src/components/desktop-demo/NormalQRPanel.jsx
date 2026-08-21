@@ -10,10 +10,10 @@ export default function NormalQRPanel({ qrState, dataSize }) {
   const capacity = getCapacityInfo(dataSize, QR_CAPACITY_BY_LEVEL.L);
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-100 flex-col rounded-3xl bg-white px-9 py-9 shadow-[0_20px_60px_rgba(255,87,87,0.08)]">
+    <div className="mx-auto flex h-full w-full max-w-120 min-w-0 flex-col rounded-2xl bg-white px-4 py-6 shadow-[0_20px_60px_rgba(255,87,87,0.08)] sm:rounded-3xl sm:px-7 sm:py-8 2xl:max-w-100 2xl:px-9 2xl:py-9">
       <div className="mb-6">
         <div className="mb-1 font-serif text-sm italic font-semibold text-(--r)">Ebene 1</div>
-        <h2 className="font-serif text-3xl font-bold">Klassischer Code</h2>
+        <h2 className="font-serif text-[clamp(1.6rem,5vw,1.875rem)] font-bold">Klassischer Code</h2>
         <p className="mt-2 text-sm leading-[1.6] text-(--tx-secondary)">
           Herkömmliche Schwarz-Weiß-QR-Technologie mit stark begrenzter Datendichte.
         </p>
@@ -48,17 +48,17 @@ export default function NormalQRPanel({ qrState, dataSize }) {
       </div>
 
       <div className="flex flex-col divide-y divide-(--bd-subtle) border-y border-(--bd-subtle)">
-        <div className="flex items-center justify-between py-3.5 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-1 py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Datenkapazität</span>
           <span className="font-bold" style={{ color: LEVEL_COLOR[capacity.level] }}>
             {formatSize(dataSize)} / {formatSize(QR_CAPACITY_BY_LEVEL.L)}
           </span>
         </div>
-        <div className="flex items-center justify-between py-3.5 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-1 py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Farbkanäle</span>
           <span className="font-bold text-(--r)">Keine (1-bit Mono)</span>
         </div>
-        <div className="flex items-center justify-between py-3.5 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-1 py-3.5 text-sm">
           <span className="text-(--tx-secondary)">Kamera-Ausrichtung</span>
           <span className="font-bold">Erforderlich</span>
         </div>

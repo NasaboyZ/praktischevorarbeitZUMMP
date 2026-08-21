@@ -6,14 +6,14 @@ import orangeFace from '../../assets/hero-Smiles/oranges-gesicht-emoji.png';
 export default function PrincipleSection({ onStart }) {
   return (
     <section id="prinzip" className="border-y border-(--bd-subtle) bg-white">
-      <div className="grid grid-cols-[minmax(160px,280px)_1fr] border-b border-(--bd-subtle)">
-        <div className="flex items-center justify-center border-r border-(--bd-subtle) px-5 py-8">
+      <div className="grid grid-cols-1 border-b border-(--bd-subtle) md:grid-cols-[minmax(160px,280px)_1fr]">
+        <div className="flex items-center justify-center border-b border-(--bd-subtle) px-5 py-6 md:border-r md:border-b-0 md:py-8">
           <span className="text-[15px] font-bold italic text-(--tx-secondary)">
             (Das Prinzip)
           </span>
         </div>
 
-        <InView className="px-10 py-16">
+        <InView className="px-5 py-12 sm:px-10 sm:py-16">
           <h2 className="mb-5 max-w-160 text-[clamp(30px,3.6vw,46px)] font-extrabold leading-tight">
             Tracke deine Stimmung,{' '}
             <span className="text-[#8FA6C9]">wann immer dir danach ist</span>
@@ -31,7 +31,7 @@ export default function PrincipleSection({ onStart }) {
 
       <InView
         variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
-        className="grid-bg relative aspect-1440/446 w-full"
+        className="grid-bg relative hidden aspect-1440/446 w-full sm:block"
       >
         <img
           src={stacksSvg}

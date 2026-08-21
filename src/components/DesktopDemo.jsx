@@ -82,18 +82,18 @@ export default function DesktopDemo() {
 
   return (
     <main
-      className="grid min-h-screen grid-cols-[1fr_1.35fr_1fr] gap-6 px-6 pt-24 pb-6"
+      className="mx-auto grid min-h-screen w-full max-w-480 grid-cols-1 gap-4 px-3 pt-20 pb-5 sm:gap-6 sm:px-6 sm:pt-24 lg:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_minmax(420px,1.55fr)_minmax(260px,1fr)] 2xl:gap-8 2xl:px-8"
       style={{
         background: 'radial-gradient(ellipse 900px 500px at 0% 0%, rgba(109,91,208,0.07), transparent 60%), radial-gradient(ellipse 900px 500px at 100% 100%, rgba(255,87,87,0.05), transparent 60%), #FAF8FC',
       }}
     >
       {/* ── LEFT: Normal QR ── */}
-      <div className="overflow-y-auto">
+      <div className="order-2 min-w-0 lg:order-2 xl:order-1">
         <NormalQRPanel qrState={normalQR} dataSize={dataSize} />
       </div>
 
       {/* ── CENTER: Control Center ── */}
-      <div className="overflow-y-auto">
+      <div className="order-1 min-w-0 lg:col-span-2 xl:order-2 xl:col-span-1">
         <ControlCenter
           entries={entries}
           setEntries={setEntries}
@@ -107,7 +107,7 @@ export default function DesktopDemo() {
       </div>
 
       {/* ── RIGHT: Multi-Layer QR ── */}
-      <div className="overflow-y-auto">
+      <div className="order-3 min-w-0">
         <MultiLayerQRPanel
           colorQR={colorQR}
           sessionQR={sessionQR}

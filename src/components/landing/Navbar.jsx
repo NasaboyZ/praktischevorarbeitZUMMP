@@ -47,7 +47,7 @@ export default function Navbar({ onStart, onHome, mode = 'landing' }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute origin-top-right right-0 top-[calc(100%+8px)] w-60 overflow-hidden rounded-xl border border-(--bd-subtle) bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]"
+              className="absolute left-1/2 top-[calc(100%+8px)] w-[min(15rem,calc(100vw-2rem))] -translate-x-1/2 origin-top overflow-hidden rounded-xl border border-(--bd-subtle) bg-white shadow-[0_16px_40px_rgba(17,24,39,0.12)]"
             >
               {!inDemo && SECTIONS.map((s) => (
                 <button

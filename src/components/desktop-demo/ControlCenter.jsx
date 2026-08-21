@@ -152,13 +152,13 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
   const layerSizes = getLayerSizes(entries);
 
   return (
-    <div className="mx-auto flex h-full max-w-160 flex-col overflow-y-auto rounded-3xl bg-white px-10 py-9 shadow-[0_20px_60px_rgba(109,91,208,0.10)]">
+    <div className="mx-auto flex h-full w-full max-w-160 min-w-0 flex-col rounded-2xl bg-white px-4 py-6 shadow-[0_20px_60px_rgba(109,91,208,0.10)] sm:rounded-3xl sm:px-8 sm:py-8 2xl:px-10 2xl:py-9">
 
       <div className="mb-7 text-center">
         <span className="mb-4 inline-block rounded-full border border-(--violet-dim) bg-(--violet-dim) px-4 py-1.5 font-serif text-xs italic font-semibold text-(--violet)">
           Bachelorarbeit Demo
         </span>
-        <h1 className="font-serif text-[42px] font-bold leading-[1.15]">
+        <h1 className="font-serif text-[clamp(2rem,7vw,2.625rem)] font-bold leading-[1.15]">
           Emotionaler<br />Multi-Layer QR-Code
         </h1>
         <p className="mx-auto mt-3 max-w-105 text-sm leading-[1.7] text-(--tx-secondary)">
@@ -188,7 +188,7 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
             className="mx-auto"
           />
 
-          <div className="rounded-2xl border border-(--bd-subtle) p-5">
+          <div className="rounded-2xl border border-(--bd-subtle) p-4 sm:p-5">
             <div className="mb-1 text-base font-bold">Wie fühlst du dich gerade?</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Mehrfachauswahl möglich</p>
             <TagPicker
@@ -200,7 +200,7 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
             />
           </div>
 
-          <div className="rounded-2xl border border-(--bd-subtle) p-5">
+          <div className="rounded-2xl border border-(--bd-subtle) p-4 sm:p-5">
             <div className="mb-1 text-base font-bold">Ort</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Wo genau fühlst du dich so?</p>
             <TagPicker
@@ -224,7 +224,7 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
 
       {step === 2 && (
         <div className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-(--bd-subtle) p-5">
+          <div className="rounded-2xl border border-(--bd-subtle) p-4 sm:p-5">
             <div className="mb-1 text-base font-bold">Notiz</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Willst du dazu was notieren?</p>
             <textarea
@@ -235,7 +235,7 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
             />
           </div>
 
-          <div className="rounded-2xl border border-(--bd-subtle) p-5">
+          <div className="rounded-2xl border border-(--bd-subtle) p-4 sm:p-5">
             <div className="mb-1 text-base font-bold">Bilder</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Willst du Bilder einfügen?</p>
             <ImageUpload
@@ -244,13 +244,13 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
             />
           </div>
 
-          <div className="rounded-2xl border border-(--bd-subtle) p-5">
+          <div className="rounded-2xl border border-(--bd-subtle) p-4 sm:p-5">
             <div className="mb-1 text-base font-bold">Sprachnotiz</div>
             <p className="mb-4 text-sm text-(--tx-muted)">Willst du eine Sprachnotiz erstellen?</p>
             <AudioRecorder audio={draft.audio} onAudio={(a) => setDraft((p) => ({ ...p, audio: a }))} />
           </div>
 
-          <div className="mt-1 flex items-center justify-center gap-3">
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
             <Button
               type="button"
               variant="outline"
@@ -272,7 +272,7 @@ export default function ControlCenter({ entries, setEntries, draft, setDraft, na
 
       {step === 3 && (
         <div className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-(--bd-subtle) p-8 text-center">
+            <div className="rounded-2xl border border-(--bd-subtle) p-5 text-center sm:p-8">
             <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-(--violet-dim)">
               <Check className="size-6 text-(--violet)" />
             </div>

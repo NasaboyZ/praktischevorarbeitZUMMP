@@ -55,14 +55,14 @@ function ColorQR({ size = 88 }) {
 
 export default function ConceptSection() {
   return (
-    <section id="konzept" className="bg-white px-10 py-22.5">
-      <div className="mx-auto grid max-w-270 grid-cols-2 items-center gap-18">
+    <section id="konzept" className="bg-white px-5 py-14 sm:px-10 sm:py-18 lg:py-22.5">
+      <div className="mx-auto grid max-w-270 grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-18">
 
         <InView>
           <div>
             <Badge className="mb-5">Das Konzept</Badge>
-            <h2 className="mb-5 text-[38px] font-extrabold leading-tight">
-              Das Noppakaew-Prinzip<br />hinter dem Multi-Layer QR
+            <h2 className="mb-5 text-[clamp(1.875rem,7vw,2.375rem)] font-extrabold leading-tight">
+              Das Noppakaew-Prinzip<br className="hidden sm:block" /> hinter dem Multi-Layer QR
             </h2>
             <p className="mb-5 text-base leading-[1.8] text-(--tx-secondary)">
               Zuerst werden die Daten auf mehrere gleich große Schwarz-Weiß-QR-Codes verteilt.
@@ -100,7 +100,7 @@ export default function ConceptSection() {
         <InView variants={{ hidden: { opacity: 0, x: 40 }, visible: { opacity: 1, x: 0 } }}>
           <div className="flex flex-col items-center gap-6">
             {/* QR Layer Visual */}
-            <div className="flex items-center gap-3">
+            <div className="flex max-w-full scale-75 items-center gap-3 sm:scale-100">
               {[
                 { color: '#FF5757', label: 'L1' },
                 { color: '#22C55E', label: 'L2' },
